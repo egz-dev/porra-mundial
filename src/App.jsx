@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import Header from './components/Header';
 import ClasificacionPage from './pages/ClasificacionPage';
 import EquiposPage from './pages/EquiposPage';
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/equipos" element={<EquiposPage />} />
         <Route path="/partidos" element={<PartidosPage />} />
       </Routes>
+      <Analytics />
     </BrowserRouter>
   );
 }
