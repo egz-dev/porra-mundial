@@ -1,0 +1,111 @@
+const PHASE_POINTS = { r32: 1, r16: 2, qf: 3, sf: 4, '3rd': 5, final: 5 };
+const PHASE_ORDER = ['final', '3rd', 'sf', 'qf', 'r16', 'r32', 'group'];
+const PHASE_LABELS = {
+  group: 'Grupos', r32: '1/16', r16: 'Octavos', qf: 'Cuartos',
+  sf: 'Semis', '3rd': '3er puesto', final: 'Final',
+};
+
+export function calcTeamStats(team, resultados) {
+  let matchPts = 0, phasePts = 0;
+  let pj = 0, v = 0, e = 0, d = 0, gf = 0, gc = 0;
+  const phasesReached = new Set();
+
+  for (const m of resultados) {
+    const isHome = m.homeTeam === team;
+    const isAway = m.awayTeam === team;
+    if (!isHome && !isAway) continue;
+
+    if (m.round) phasesReached.add(m.round);
+
+    if (m.status !== 'FT' || m.homeGoals === null || m.awayGoals === null) continue;
+
+    pj++;
+    const myGoals = isHome ? m.homeGoals : m.awayGoals;
+    const theirGoals = isHome ? m.awayGoals : m.homeGoals;
+    gf += myGoals;
+    gc += theirGoals;
+
+    if (myGoals > theirGoals) { matchPts += 3; v++; }
+    else if (myGoals === theirGoals) { matchPts += 1; e++; }
+    else { d++; }
+
+    if (theirGoals === 0) matchPts += 1;
+    matchPts += Math.floor(myGoals / 3);
+  }
+
+  for (const phase of phasesReached) {
+    phasePts += PHASE_POINTS[phase] || 0;
+  }
+
+  const faseAlcanzada = getFaseLabel(phasesReached);
+  return { matchPts, phasePts, pj, v, e, d, gf, gc, phasesReached, faseAlcanzada };
+}
+
+function getFaseLabel(phasesReached) {
+  for (const phase of PHASE_ORDER) {
+    if (phasesReached.has(phase)) return PHASE_LABELS[phase] || phase;
+  }
+  return '—';
+}
+
+export function detectChampion(resultados) {
+  const f = resultados.find(m => m.round === 'final' && m.status === 'FT');
+  if (!f || f.homeGoals === null || f.awayGoals === null || f.homeGoals === f.awayGoals) return null;
+  return f.homeGoals > f.awayGoals ? f.homeTeam : f.awayTeam;
+}
+
+export function calcClasificacion(participantes, resultados) {
+  const champion = detectChampion(resultados);
+
+  const scored = participantes.map(p => {
+    let totalGF = 0, totalGC = 0, totalMatchPts = 0, totalPhasePts = 0, championBonus = 0;
+
+    const equipoScores = p.equipos.map(equipo => {
+      const s = calcTeamStats(equipo, resultados);
+      const bonus = champion && equipo === champion ? 10 : 0;
+      totalMatchPts += s.matchPts;
+      totalPhasePts += s.phasePts;
+      championBonus += bonus;
+      totalGF += s.gf;
+      totalGC += s.gc;
+      return { equipo, matchPts: s.matchPts, phasePts: s.phasePts, pj: s.pj, v: s.v, e: s.e, d: s.d, gf: s.gf, gc: s.gc, faseAlcanzada: s.faseAlcanzada, championBonus: bonus, pts: s.matchPts + s.phasePts + bonus };
+    });
+
+    const total = totalMatchPts + totalPhasePts + championBonus;
+    return { ...p, total, totalGF, totalGC, equipoScores };
+  });
+
+  scored.sort((a, b) => {
+    if (b.total !== a.total) return b.total - a.total;
+    if (b.totalGF !== a.totalGF) return b.totalGF - a.totalGF;
+    return a.totalGC - b.totalGC;
+  });
+
+  return scored;
+}
+
+export function calcEquiposStats(resultados) {
+  const teams = new Set();
+  for (const m of resultados) {
+    if (m.homeTeam) teams.add(m.homeTeam);
+    if (m.awayTeam) teams.add(m.awayTeam);
+  }
+
+  const stats = Array.from(teams).map(team => {
+    const s = calcTeamStats(team, resultados);
+    return {
+      team,
+      pts: s.matchPts + s.phasePts,
+      pj: s.pj,
+      v: s.v,
+      e: s.e,
+      d: s.d,
+      gf: s.gf,
+      gc: s.gc,
+      faseAlcanzada: s.faseAlcanzada,
+    };
+  });
+
+  stats.sort((a, b) => b.pts - a.pts || b.gf - a.gf || a.gc - b.gc);
+  return stats;
+}
