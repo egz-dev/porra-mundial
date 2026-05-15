@@ -1,156 +1,141 @@
-/**
- * Porra Mundial 2026 — Google Apps Script
- *
- * Deploy: Extensions > Apps Script > Deploy > New deployment
- *   Type: Web app
- *   Execute as: Me
- *   Who has access: Anyone
- *
- * After deploy, copy the URL to VITE_APPS_SCRIPT_URL in .env.local
- */
+var TEAM_NAME_MAP = {
+  'Brazil': 'Brasil', 'Spain': 'España', 'England': 'Inglaterra',
+  'France': 'Francia', 'Netherlands': 'Países Bajos', 'Germany': 'Alemania',
+  'Portugal': 'Portugal', 'Argentina': 'Argentina', 'Italy': 'Italia',
+  'Norway': 'Noruega', 'Belgium': 'Bélgica', 'Canada': 'Canadá',
+  'Switzerland': 'Suiza', 'Mexico': 'México', 'Japan': 'Japón',
+  'United States': 'EEUU', 'Turkey': 'Turquía', 'Sweden': 'Suecia',
+  'Croatia': 'Croacia', 'Morocco': 'Marruecos', 'South Korea': 'Corea del Sur',
+  'Egypt': 'Egipto', 'Algeria': 'Argelia', 'DR Congo': 'Rep. Dem. del Congo',
+  'Tunisia': 'Túnez', 'Colombia': 'Colombia', 'Ecuador': 'Ecuador',
+  'Senegal': 'Senegal', 'Ghana': 'Ghana', 'Cameroon': 'Camerún',
+  'Scotland': 'Escocia', 'Iran': 'Irán', 'Czech Republic': 'Chequia',
+  "Ivory Coast": 'Costa de Marfil', 'New Zealand': 'Nueva Zelanda',
+  'Curacao': 'Curaçao', 'Jordan': 'Jordania', 'South Africa': 'Sudáfrica',
+  'Uzbekistan': 'Uzbekistán', 'Haiti': 'Haití', 'Qatar': 'Catar',
+  'Iraq': 'Irak', 'Panama': 'Panamá', 'Cabo Verde': 'Cabo Verde',
+  'Saudi Arabia': 'Arabia Saudí', 'Australia': 'Australia', 'Chile': 'Chile',
+  'Venezuela': 'Venezuela', 'Peru': 'Perú', 'Uruguay': 'Uruguay',
+};
 
-const SS_ID = PropertiesService.getScriptProperties().getProperty('SS_ID');
-const ADMIN_PASSWORD = PropertiesService.getScriptProperties().getProperty('ADMIN_PASSWORD');
+var ROUND_MAP = {
+  'Round of 32': 'r32',
+  'Round of 16': 'r16',
+  'Quarter-finals': 'qf',
+  'Semi-finals': 'sf',
+  '3rd Place Final': '3rd',
+  'Final': 'final',
+};
 
-function getSheet(name) {
-  return SpreadsheetApp.openById(SS_ID).getSheetByName(name);
+function normalizeRound(round) {
+  if (!round) return 'group';
+  if (ROUND_MAP[round]) return ROUND_MAP[round];
+  if (round.indexOf('Group Stage') === 0) return 'group';
+  return round.toLowerCase().replace(/\s+/g, '_');
 }
 
-function generateToken() {
-  return Utilities.getUuid();
+function normalizeTeam(name) {
+  return TEAM_NAME_MAP[name] || name;
 }
 
-function doPost(e) {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Content-Type': 'application/json',
-  };
+function fetchResults() {
+  var props = PropertiesService.getScriptProperties();
+  var apiKey = props.getProperty('FOOTBALL_API_KEY');
+  var spreadsheetId = props.getProperty('SPREADSHEET_ID');
+  var sheetName = props.getProperty('RESULTS_SHEET_NAME') || 'Resultados';
 
-  try {
-    const body = JSON.parse(e.postData.contents);
-    const { action } = body;
-
-    let result;
-    if (action === 'createBet')  result = createBet(body);
-    else if (action === 'updateBet')  result = updateBet(body);
-    else if (action === 'updateMatch') result = updateMatch(body);
-    else if (action === 'togglePaid')  result = togglePaid(body);
-    else throw new Error('Acción desconocida: ' + action);
-
-    return ContentService
-      .createTextOutput(JSON.stringify({ ok: true, ...result }))
-      .setMimeType(ContentService.MimeType.JSON);
-
-  } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ ok: false, error: err.message }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function createBet({ nombre, apellido, alias, paises }) {
-  if (!nombre || !alias) throw new Error('Nombre y alias obligatorios');
-  if (!Array.isArray(paises) || paises.length !== 13) throw new Error('Debes elegir exactamente 13 países');
-
-  const config = getConfig();
-  if (Date.now() > new Date(config.fecha_cierre).getTime()) {
-    throw new Error('Las apuestas están cerradas');
+  if (!apiKey || !spreadsheetId) {
+    Logger.log('ERROR: FOOTBALL_API_KEY or SPREADSHEET_ID not set in Script Properties');
+    return;
   }
 
-  const sheet = getSheet('apuestas');
-  const token = generateToken();
-  const now = new Date().toISOString();
-
-  sheet.appendRow([
-    token,
-    nombre,
-    apellido || '',
-    alias,
-    paises.join(','),
-    now,
-    'FALSE', // pagado
-  ]);
-
-  return { token };
-}
-
-function updateBet({ token, nombre, apellido, alias, paises }) {
-  if (!token) throw new Error('Token requerido');
-
-  const config = getConfig();
-  if (Date.now() > new Date(config.fecha_cierre).getTime()) {
-    throw new Error('Las apuestas están cerradas');
+  var ss = SpreadsheetApp.openById(spreadsheetId);
+  var sheet = ss.getSheetByName(sheetName);
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
   }
 
-  const sheet = getSheet('apuestas');
-  const data = sheet.getDataRange().getValues();
+  var existingData = sheet.getDataRange().getValues();
+  var idToRow = {};
+  for (var i = 0; i < existingData.length; i++) {
+    var matchId = existingData[i][0];
+    if (matchId) idToRow[String(matchId)] = i;
+  }
 
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0] === token) {
-      sheet.getRange(i + 1, 2).setValue(nombre || data[i][1]);
-      sheet.getRange(i + 1, 3).setValue(apellido !== undefined ? apellido : data[i][2]);
-      sheet.getRange(i + 1, 4).setValue(alias || data[i][3]);
-      if (Array.isArray(paises) && paises.length === 13) {
-        sheet.getRange(i + 1, 5).setValue(paises.join(','));
+  var url = 'https://v3.football.api-sports.io/fixtures?league=1&season=2026';
+  var response = UrlFetchApp.fetch(url, {
+    headers: { 'x-apisports-key': apiKey },
+    muteHttpExceptions: true,
+  });
+
+  if (response.getResponseCode() !== 200) {
+    Logger.log('API error: ' + response.getContentText());
+    return;
+  }
+
+  var json = JSON.parse(response.getContentText());
+  var fixtures = json.response || [];
+  Logger.log('Fixtures fetched: ' + fixtures.length);
+
+  var allowedStatuses = { 'FT': true, 'NS': true, 'LIVE': true, '1H': true, 'HT': true, '2H': true };
+
+  for (var j = 0; j < fixtures.length; j++) {
+    var f = fixtures[j];
+    var status = f.fixture.status.short;
+    if (!allowedStatuses[status]) continue;
+
+    var matchId = f.fixture.id;
+    var homeTeam = normalizeTeam(f.teams.home.name);
+    var awayTeam = normalizeTeam(f.teams.away.name);
+    var homeGoals = f.goals.home !== null && f.goals.home !== undefined ? f.goals.home : '';
+    var awayGoals = f.goals.away !== null && f.goals.away !== undefined ? f.goals.away : '';
+    var normalStatus = (status === '1H' || status === 'HT' || status === '2H') ? 'LIVE' : status;
+    var round = normalizeRound(f.league.round);
+    var date = f.fixture.date || '';
+
+    var row = [matchId, homeTeam, awayTeam, homeGoals, awayGoals, normalStatus, round, date];
+    var key = String(matchId);
+
+    if (idToRow.hasOwnProperty(key)) {
+      var rowIdx = idToRow[key];
+      for (var c = 0; c < row.length; c++) {
+        existingData[rowIdx][c] = row[c];
       }
-      return { updated: true };
+    } else {
+      idToRow[key] = existingData.length;
+      existingData.push(row);
     }
   }
 
-  throw new Error('Token no encontrado');
-}
-
-function updateMatch({ adminPassword, matchId, golesLocal, golesVisitante, tarjetasRojas }) {
-  if (adminPassword !== ADMIN_PASSWORD) throw new Error('Contraseña incorrecta');
-
-  const sheet = getSheet('partidos');
-  const data = sheet.getDataRange().getValues();
-
-  for (let i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === String(matchId)) {
-      sheet.getRange(i + 1, 5).setValue(golesLocal !== undefined ? golesLocal : data[i][4]);
-      sheet.getRange(i + 1, 6).setValue(golesVisitante !== undefined ? golesVisitante : data[i][5]);
-      if (tarjetasRojas !== undefined) {
-        sheet.getRange(i + 1, 7).setValue(tarjetasRojas);
-      }
-      return { updated: true };
+  if (existingData.length > 0) {
+    try {
+      sheet.clearContents();
+      sheet.getRange(1, 1, existingData.length, 8).setValues(existingData);
+      Logger.log('Done. Rows in sheet: ' + existingData.length);
+    } catch (e) {
+      Logger.log('ERROR writing to sheet: ' + e.message);
     }
   }
-
-  throw new Error('Partido no encontrado: ' + matchId);
 }
 
-function togglePaid({ adminPassword, token }) {
-  if (adminPassword !== ADMIN_PASSWORD) throw new Error('Contraseña incorrecta');
+function setupTrigger() {
+  clearTriggers();
+  ScriptApp.newTrigger('fetchResults')
+    .timeBased()
+    .everyHours(1)
+    .create();
+  Logger.log('Hourly trigger created for fetchResults');
+}
 
-  const sheet = getSheet('apuestas');
-  const data = sheet.getDataRange().getValues();
-
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0] === token) {
-      const current = data[i][6] === true || data[i][6] === 'TRUE';
-      sheet.getRange(i + 1, 7).setValue(!current ? 'TRUE' : 'FALSE');
-      return { paid: !current };
-    }
+function clearTriggers() {
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < triggers.length; i++) {
+    ScriptApp.deleteTrigger(triggers[i]);
   }
-
-  throw new Error('Token no encontrado');
+  Logger.log('All triggers cleared');
 }
 
-function getConfig() {
-  const sheet = getSheet('config');
-  if (!sheet) return { fecha_cierre: '2026-06-11T14:00:00-05:00' };
-  const data = sheet.getDataRange().getValues();
-  const cfg = {};
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0]) cfg[data[i][0]] = data[i][1];
-  }
-  return cfg;
-}
-
-// GET — health check
 function doGet() {
-  return ContentService
-    .createTextOutput(JSON.stringify({ ok: true, service: 'porra-mundial-2026' }))
+  return ContentService.createTextOutput(JSON.stringify({ ok: true, ts: new Date().toISOString() }))
     .setMimeType(ContentService.MimeType.JSON);
 }
