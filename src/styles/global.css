@@ -771,7 +771,7 @@ main {
 .equipos-table td {
   padding: 8px 12px;
   text-align: right;
-  border-bottom: 1px solid var(--c-border);
+  border-bottom: 1px solid var(--c-line);
 }
 .equipos-table th:first-child,
 .equipos-table td:first-child {
@@ -785,7 +785,7 @@ main {
   letter-spacing: 0.05em;
 }
 .equipos-table tbody tr:hover {
-  background: var(--c-surface);
+  background: var(--c-bg-2);
 }
 .equipo-cell {
   display: flex;
@@ -805,7 +805,7 @@ main {
   color: var(--c-muted);
   margin-bottom: 12px;
   padding-bottom: 6px;
-  border-bottom: 1px solid var(--c-border);
+  border-bottom: 1px solid var(--c-line);
 }
 .partido-row {
   display: grid;
@@ -813,7 +813,7 @@ main {
   align-items: center;
   gap: 8px;
   padding: 10px 0;
-  border-bottom: 1px solid var(--c-border);
+  border-bottom: 1px solid var(--c-line);
 }
 .partido-home {
   text-align: right;
