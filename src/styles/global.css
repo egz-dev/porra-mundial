@@ -632,10 +632,10 @@ main {
 }
 .rank-row {
   display: grid;
-  grid-template-columns: 50px 1fr 80px 80px;
-  gap: 12px;
+  grid-template-columns: 56px 1fr 90px 150px;
+  gap: 16px;
   align-items: center;
-  padding: 14px 18px;
+  padding: 16px 20px;
   border-bottom: 1px solid var(--c-line);
 }
 .rank-row:last-child { border-bottom: none; }
@@ -646,14 +646,15 @@ main {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  padding: 12px 18px;
+  padding: 13px 20px;
 }
 .rank-pos {
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--c-muted);
   font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 .rank-row.top1 .rank-pos { color: var(--c-accent); }
 .rank-row.top1 { background: linear-gradient(90deg, rgba(232,184,31,0.18), transparent 60%); }
@@ -661,7 +662,7 @@ main {
 .rank-row.top3 .rank-pos { color: #c08858; }
 .rank-name {
   font-weight: 700;
-  font-size: 16px;
+  font-size: 17px;
 }
 .rank-name small {
   display: block;
@@ -669,11 +670,12 @@ main {
   font-size: 11px;
   color: var(--c-muted);
   font-family: var(--font-mono);
-  margin-top: 2px;
+  margin-top: 3px;
+  letter-spacing: 0.03em;
 }
 .rank-pts {
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 700;
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -681,9 +683,8 @@ main {
 }
 .rank-mini {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--c-muted);
-  text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
@@ -741,22 +742,21 @@ main {
   .group-title { font-size: 22px; }
   .form-section { padding: 18px; }
   .summary-inner { padding: 12px 16px; }
-  .rank-row { grid-template-columns: 40px 1fr 60px; padding: 12px; gap: 8px; }
+  .rank-row { grid-template-columns: 44px 1fr 70px; padding: 14px 14px; gap: 10px; }
   .rank-row .rank-mini { display: none; }
   .modal { padding: 22px; }
   .summary-status { width: 100%; }
 }
 
-/* ── Clasificación table (5 columns) ─────────────────────── */
-.rank-row--5col {
-  grid-template-columns: 50px 1fr 80px 100px 1fr;
+/* ── Clasificación table (4 columns) ─────────────────────── */
+.rank-row--4col {
+  grid-template-columns: 56px 1fr 90px 150px;
 }
 @media (max-width: 600px) {
-  .rank-row--5col {
-    grid-template-columns: 40px 1fr 60px;
+  .rank-row--4col {
+    grid-template-columns: 44px 1fr 70px;
   }
-  .rank-row--5col .rank-telegram,
-  .rank-row--5col .rank-flags {
+  .rank-row--4col .rank-mini {
     display: none;
   }
 }
@@ -834,9 +834,43 @@ main {
   font-size: 16px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
 }
 .partido-score--live {
   color: var(--c-red, #e53e3e);
+}
+.partido-score--ns {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-muted);
+}
+.partidos-day-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--c-muted);
+  padding: 10px 0 4px;
+}
+.partido-tbd {
+  font-size: 12px;
+  color: var(--c-muted);
+  font-style: italic;
+}
+.partido-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--c-muted);
+  line-height: 1;
+}
+.partido-badge--live {
+  color: var(--c-red);
 }
 
 /* ── Participant detail modal ─────────────────────────────── */

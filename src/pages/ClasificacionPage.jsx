@@ -8,6 +8,7 @@ const teamToFlag = new Map(TODOS_LOS_PAISES.map(p => [p.nombre, isoToFlag(p.iso)
 function flag(team) { return teamToFlag.get(team) || '🏳'; }
 
 const TOP_CLASS = { 1: 'top1', 2: 'top2', 3: 'top3' };
+const MEDAL = { 1: '🥇', 2: '🥈', 3: '🥉' };
 
 function ParticipantModal({ entry, onClose }) {
   return (
@@ -63,12 +64,11 @@ export default function ClasificacionPage() {
           </div>
 
           <div className="rank-table" role="table" aria-label="Clasificación">
-            <div className={['rank-row', 'rank-row--5col', 'rank-header'].join(' ')} role="row" aria-rowindex={1}>
-              <span className="rank-pos">Pos</span>
-              <span className="rank-name">Nombre</span>
-              <span className="rank-pts">Pts</span>
-              <span className="rank-telegram">@Telegram</span>
-              <span className="rank-flags">Equipos</span>
+            <div className="rank-row rank-row--4col head" role="row" aria-rowindex={1}>
+              <span>#</span>
+              <span>Nombre</span>
+              <span style={{ textAlign: 'right' }}>Puntos</span>
+              <span>Telegram</span>
             </div>
             {clasificacion.map((entry, idx) => {
               const pos = idx + 1;
@@ -76,7 +76,7 @@ export default function ClasificacionPage() {
               return (
                 <div
                   key={entry.nombre}
-                  className={['rank-row', 'rank-row--5col', topClass].filter(Boolean).join(' ')}
+                  className={['rank-row', 'rank-row--4col', topClass].filter(Boolean).join(' ')}
                   role="row"
                   aria-rowindex={pos + 1}
                   style={{ cursor: 'pointer' }}
@@ -84,13 +84,13 @@ export default function ClasificacionPage() {
                   tabIndex={0}
                   onKeyDown={e => e.key === 'Enter' && setSelected(entry)}
                 >
-                  <span className="rank-pos">{pos}</span>
-                  <span className="rank-name">{entry.nombre}</span>
-                  <span className="rank-pts">{entry.total}</span>
-                  <span className="rank-telegram">{entry.telegram ? `@${entry.telegram}` : '—'}</span>
-                  <span className="rank-flags rank-mini">
-                    {entry.equipos.map(eq => flag(eq)).join(' ')}
+                  <span className="rank-pos">{MEDAL[pos] || pos}</span>
+                  <span className="rank-name">
+                    {entry.nombre}
+                    <small>ver equipos →</small>
                   </span>
+                  <span className="rank-pts">{entry.total}</span>
+                  <span className="rank-mini">{entry.telegram ? `@${entry.telegram}` : '—'}</span>
                 </div>
               );
             })}
