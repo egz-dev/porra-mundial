@@ -1,4 +1,4 @@
-const NUM_PREFIX_RE = /^\d+-/;
+const NUM_PREFIX_RE = /^\d+\s*-\s*/;
 
 function normalizeName(raw) {
   return (raw || '').replace(NUM_PREFIX_RE, '').trim();
