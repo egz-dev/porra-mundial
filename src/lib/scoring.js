@@ -54,13 +54,28 @@ export function detectChampion(resultados) {
   return f.homeGoals > f.awayGoals ? f.homeTeam : f.awayTeam;
 }
 
+function normKey(s) {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+}
+
 export function calcClasificacion(participantes, resultados) {
   const champion = detectChampion(resultados);
+
+  const resultadosTeams = new Set();
+  for (const m of resultados) {
+    if (m.homeTeam) resultadosTeams.add(m.homeTeam);
+    if (m.awayTeam) resultadosTeams.add(m.awayTeam);
+  }
+  const normToCanonical = new Map(Array.from(resultadosTeams).map(t => [normKey(t), t]));
+  function resolveTeam(raw) {
+    return normToCanonical.get(normKey(raw)) ?? raw;
+  }
 
   const scored = participantes.map(p => {
     let totalGF = 0, totalGC = 0, totalMatchPts = 0, totalPhasePts = 0, championBonus = 0;
 
-    const equipoScores = p.equipos.map(equipo => {
+    const equipoScores = p.equipos.map(rawEquipo => {
+      const equipo = resolveTeam(rawEquipo);
       const s = calcTeamStats(equipo, resultados);
       const bonus = champion && equipo === champion ? 10 : 0;
       totalMatchPts += s.matchPts;
@@ -68,7 +83,7 @@ export function calcClasificacion(participantes, resultados) {
       championBonus += bonus;
       totalGF += s.gf;
       totalGC += s.gc;
-      return { equipo, matchPts: s.matchPts, phasePts: s.phasePts, pj: s.pj, v: s.v, e: s.e, d: s.d, gf: s.gf, gc: s.gc, faseAlcanzada: s.faseAlcanzada, championBonus: bonus, pts: s.matchPts + s.phasePts + bonus };
+      return { equipo: rawEquipo, matchPts: s.matchPts, phasePts: s.phasePts, pj: s.pj, v: s.v, e: s.e, d: s.d, gf: s.gf, gc: s.gc, faseAlcanzada: s.faseAlcanzada, championBonus: bonus, pts: s.matchPts + s.phasePts + bonus };
     });
 
     const total = totalMatchPts + totalPhasePts + championBonus;
