@@ -5,13 +5,17 @@ import { GRUPOS, isoToFlagUrl } from '../data/paises';
 
 const TODOS_LOS_PAISES = GRUPOS.flatMap(g => g.paises);
 function normKey(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim(); }
-const teamToIso = new Map(TODOS_LOS_PAISES.map(p => [normKey(p.nombre), p.iso]));
+const teamToIsoExact = new Map(TODOS_LOS_PAISES.map(p => [p.nombre, p.iso]));
+const teamToIsoNorm  = new Map(TODOS_LOS_PAISES.map(p => [normKey(p.nombre), p.iso]));
 function flag(team) {
   if (!team) return null;
-  const iso = teamToIso.get(normKey(team));
+  const iso = teamToIsoExact.get(team) ?? teamToIsoNorm.get(normKey(team));
+  if (!iso) console.warn('[porra] no flag ISO for team:', JSON.stringify(team));
   return iso
-    ? <img src={isoToFlagUrl(iso)} alt={team} width={20} height={15} style={{ verticalAlign: 'middle' }} />
-    : '🏳';
+    ? <img src={isoToFlagUrl(iso)} alt={team} width={20} height={15} style={{ verticalAlign: 'middle' }}
+        onError={e => { e.target.style.display = 'none'; console.warn('[porra] flag img failed:', isoToFlagUrl(iso)); }}
+      />
+    : null;
 }
 
 const TOP_CLASS = { 1: 'top1', 2: 'top2', 3: 'top3' };
