@@ -1,10 +1,15 @@
 import { useSheetData } from '../hooks/useSheetData';
 import { calcEquiposStats } from '../lib/scoring';
-import { GRUPOS, isoToFlag } from '../data/paises';
+import { GRUPOS, isoToFlagUrl } from '../data/paises';
 
 const TODOS_LOS_PAISES = GRUPOS.flatMap(g => g.paises);
-const teamToFlag = new Map(TODOS_LOS_PAISES.map(p => [p.nombre, isoToFlag(p.iso)]));
-function flag(team) { return teamToFlag.get(team) || '🏳'; }
+const teamToIso = new Map(TODOS_LOS_PAISES.map(p => [p.nombre, p.iso]));
+function flag(team) {
+  const iso = teamToIso.get(team);
+  return iso
+    ? <img src={isoToFlagUrl(iso)} alt={team} width={20} height={15} style={{ verticalAlign: 'middle' }} />
+    : '🏳';
+}
 
 export default function EquiposPage() {
   const { resultados, loading, error } = useSheetData();

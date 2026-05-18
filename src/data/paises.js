@@ -105,3 +105,8 @@ export function isoToFlag(iso) {
     String.fromCodePoint(127397 + c.charCodeAt(0))
   );
 }
+
+export function isoToFlagUrl(iso) {
+  if (!iso) return null;
+  return `https://flagcdn.com/20x15/${iso.toLowerCase()}.png`;
+}

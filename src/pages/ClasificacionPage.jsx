@@ -1,12 +1,18 @@
 import { useState, Fragment } from 'react';
 import { useSheetData } from '../hooks/useSheetData';
 import { calcClasificacion } from '../lib/scoring';
-import { GRUPOS, isoToFlag } from '../data/paises';
+import { GRUPOS, isoToFlagUrl } from '../data/paises';
 
 const TODOS_LOS_PAISES = GRUPOS.flatMap(g => g.paises);
 function normKey(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim(); }
-const teamToFlag = new Map(TODOS_LOS_PAISES.map(p => [normKey(p.nombre), isoToFlag(p.iso)]));
-function flag(team) { return team ? (teamToFlag.get(normKey(team)) || '🏳') : null; }
+const teamToIso = new Map(TODOS_LOS_PAISES.map(p => [normKey(p.nombre), p.iso]));
+function flag(team) {
+  if (!team) return null;
+  const iso = teamToIso.get(normKey(team));
+  return iso
+    ? <img src={isoToFlagUrl(iso)} alt={team} width={20} height={15} style={{ verticalAlign: 'middle' }} />
+    : '🏳';
+}
 
 const TOP_CLASS = { 1: 'top1', 2: 'top2', 3: 'top3' };
 const MEDAL = { 1: '🥇', 2: '🥈', 3: '🥉' };
