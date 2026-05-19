@@ -40,7 +40,7 @@ export default function Header() {
           <div className="brand">
             <div className="brand-mark" aria-hidden="true" />
             <div className="brand-text">
-              <span className="kicker">TIC A1</span>
+              <span className="kicker">{import.meta.env.VITE_GROUP_NAME}</span>
               <span className="name">Porra Mundial 2026</span>
             </div>
           </div>

@@ -42,6 +42,7 @@ export default function EquiposPage() {
                 <th>D</th>
                 <th>GF</th>
                 <th>GC</th>
+                <th>Rojas</th>
                 <th>Fase</th>
               </tr>
             </thead>
@@ -54,13 +55,25 @@ export default function EquiposPage() {
                       <span>{s.team}</span>
                     </div>
                   </td>
-                  <td><strong>{s.pts}</strong></td>
+                  <td>
+                    <strong>{s.pts}</strong>
+                    {s.pts > 0 && (
+                      <div className="pts-breakdown">
+                        {s.winPts > 0 && <span title="Victorias">V:{s.winPts}</span>}
+                        {s.drawPts > 0 && <span title="Empates">E:{s.drawPts}</span>}
+                        {s.cleanSheetPts > 0 && <span title="Porterías a cero">PG:{s.cleanSheetPts}</span>}
+                        {s.goalBonusPts > 0 && <span title="Bonus goles (cada 3)">G:{s.goalBonusPts}</span>}
+                        {s.phasePts > 0 && <span title="Puntos de fase">F:{s.phasePts}</span>}
+                      </div>
+                    )}
+                  </td>
                   <td>{s.pj}</td>
                   <td>{s.v}</td>
                   <td>{s.e}</td>
                   <td>{s.d}</td>
                   <td>{s.gf}</td>
                   <td>{s.gc}</td>
+                  <td style={{ color: s.redCards > 0 ? 'var(--c-red, #e53e3e)' : undefined, fontWeight: s.redCards > 0 ? 700 : undefined }}>{s.redCards || '—'}</td>
                   <td>{s.faseAlcanzada}</td>
                 </tr>
               ))}

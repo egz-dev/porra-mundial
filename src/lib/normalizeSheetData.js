@@ -1,7 +1,8 @@
 const NUM_PREFIX_RE = /^\d+\s*-\s*/;
+const FLAG_RE = /[\u{1F1E0}-\u{1F1FF}]/gu;
 
 function normalizeName(raw) {
-  return (raw || '').replace(NUM_PREFIX_RE, '').trim();
+  return (raw || '').replace(FLAG_RE, '').trim().replace(NUM_PREFIX_RE, '').trim();
 }
 
 export function parseParticipantes(rows) {
@@ -11,7 +12,10 @@ export function parseParticipantes(rows) {
     timestamp: row[0] || '',
     nombre: (row[2] || '').trim(),
     telegram: (row[3] || '').replace(/^@/, '').toLowerCase().trim(),
-    equipos: row.slice(4, 17).map(normalizeName).filter(Boolean),
+    equipos: row.slice(4, 17)
+      .flatMap(cell => (cell || '').split(','))
+      .map(normalizeName)
+      .filter(s => s && s.toUpperCase() !== 'FALSE'),
   })).filter(e => e.nombre);
 
   raw.sort((a, b) => (b.timestamp > a.timestamp ? 1 : b.timestamp < a.timestamp ? -1 : 0));
@@ -39,12 +43,14 @@ export function parseResultados(rows) {
     .filter(row => row[0] !== undefined && row[0] !== '')
     .map(row => ({
       matchId: Number(row[0]),
-      homeTeam: String(row[1] || ''),
-      awayTeam: String(row[2] || ''),
+      homeTeam: String(row[1] || '').trim(),
+      awayTeam: String(row[2] || '').trim(),
       homeGoals: row[3] !== '' && row[3] !== undefined ? Number(row[3]) : null,
       awayGoals: row[4] !== '' && row[4] !== undefined ? Number(row[4]) : null,
-      status: String(row[5] || 'NS'),
+      status: String(row[5] || 'NS').trim(),
       round: String(row[6] || ''),
       date: String(row[7] || ''),
+      homeRedCards: row[8] !== '' && row[8] !== undefined ? Number(row[8]) : 0,
+      awayRedCards: row[9] !== '' && row[9] !== undefined ? Number(row[9]) : 0,
     }));
 }

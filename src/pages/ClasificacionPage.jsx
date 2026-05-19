@@ -30,10 +30,25 @@ function ParticipantModal({ entry, onClose }) {
           {entry.equipoScores.map(s => (
             <Fragment key={s.equipo}>
               <div className="equipo-score-name">
-                {/* <span>{flag(s.equipo)}</span> */}
+                <span>{flag(s.equipo)}</span>
                 <span>{s.equipo}</span>
               </div>
-              <div className="equipo-score-pts">{s.pts} pts</div>
+              <div className="equipo-score-pts">
+                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8 }}>
+                  <span>{s.pts} pts</span>
+                  {s.redCards > 0 && <span style={{ color: 'var(--c-red, #e53e3e)', fontWeight: 700, fontSize: 13 }}>🟥 {s.redCards}</span>}
+                </div>
+                {s.pts > 0 && (
+                  <div className="pts-breakdown">
+                    {s.winPts > 0 && <span title="Victorias">V:{s.winPts}</span>}
+                    {s.drawPts > 0 && <span title="Empates">E:{s.drawPts}</span>}
+                    {s.cleanSheetPts > 0 && <span title="Porterías a cero">PG:{s.cleanSheetPts}</span>}
+                    {s.goalBonusPts > 0 && <span title="Bonus goles (cada 3)">G:{s.goalBonusPts}</span>}
+                    {s.phasePts > 0 && <span title="Puntos de fase">F:{s.phasePts}</span>}
+                    {s.championBonus > 0 && <span title="Bonus campeón">🏆:{s.championBonus}</span>}
+                  </div>
+                )}
+              </div>
             </Fragment>
           ))}
         </div>
@@ -74,10 +89,11 @@ export default function ClasificacionPage() {
           </div>
 
           <div className="rank-table" role="table" aria-label="Clasificación">
-            <div className="rank-row rank-row--4col head" role="row" aria-rowindex={1}>
+            <div className="rank-row rank-row--5col head" role="row" aria-rowindex={1}>
               <span>#</span>
               <span>Nombre</span>
               <span style={{ textAlign: 'right' }}>Puntos</span>
+              <span style={{ textAlign: 'right' }}>🟥</span>
               <span>Telegram</span>
             </div>
             {clasificacion.map((entry, idx) => {
@@ -86,7 +102,7 @@ export default function ClasificacionPage() {
               return (
                 <div
                   key={entry.nombre}
-                  className={['rank-row', 'rank-row--4col', topClass].filter(Boolean).join(' ')}
+                  className={['rank-row', 'rank-row--5col', topClass].filter(Boolean).join(' ')}
                   role="row"
                   aria-rowindex={pos + 1}
                   style={{ cursor: 'pointer' }}
@@ -100,6 +116,7 @@ export default function ClasificacionPage() {
                     <small>ver equipos →</small>
                   </span>
                   <span className="rank-pts">{entry.total}</span>
+                  <span className="rank-red">{entry.totalRedCards || '—'}</span>
                   <span className="rank-mini">{entry.telegram ? `@${entry.telegram}` : '—'}</span>
                 </div>
               );

@@ -56,6 +56,20 @@ function normalizeMatchStatus(apiStatus, duration) {
   return apiStatus;
 }
 
+// Returns [homeRedCards, awayRedCards] from the bookings array
+function extractRedCards(match) {
+  if (!match.bookings || !Array.isArray(match.bookings)) return [0, 0];
+  var homeId = match.homeTeam && match.homeTeam.id;
+  var homeRed = 0, awayRed = 0;
+  for (var i = 0; i < match.bookings.length; i++) {
+    var b = match.bookings[i];
+    if (b.type !== 'RED_CARD' && b.type !== 'YELLOW_RED_CARD') continue;
+    if (b.team && b.team.id === homeId) homeRed++;
+    else awayRed++;
+  }
+  return [homeRed, awayRed];
+}
+
 // Returns [homeGoals, awayGoals] from a match object given the normalized status
 function extractGoals(match, normalizedStatus) {
   if (normalizedStatus === 'NS') return ['', ''];
@@ -187,6 +201,7 @@ function preloadFixtures() {
       'NS',
       normalizeStage(m.stage),
       m.utcDate || '',
+      0, 0,
     ]);
   }
 
@@ -196,7 +211,7 @@ function preloadFixtures() {
   }
 
   var startRow = sheet.getLastRow() + 1;
-  sheet.getRange(startRow, 1, newRows.length, 8).setValues(newRows);
+  sheet.getRange(startRow, 1, newRows.length, 10).setValues(newRows);
   Logger.log('preloadFixtures: añadidas ' + newRows.length + ' filas (total API: ' + matches.length + ')');
 }
 
@@ -231,6 +246,7 @@ function fetchResults() {
     var m = matches[j];
     var status = normalizeMatchStatus(m.status, m.score && m.score.duration);
     var goals = extractGoals(m, status);
+    var reds = extractRedCards(m);
     var row = [
       m.id,
       normalizeTeam(m.homeTeam.name),
@@ -239,6 +255,7 @@ function fetchResults() {
       status,
       normalizeStage(m.stage),
       m.utcDate || '',
+      reds[0], reds[1],
     ];
     var key = String(m.id);
 
@@ -267,7 +284,7 @@ function fetchResults() {
 
   try {
     sheet.clearContents();
-    sheet.getRange(1, 1, existingData.length, 8).setValues(existingData);
+    sheet.getRange(1, 1, existingData.length, 10).setValues(existingData);
     Logger.log('fetchResults: hoja actualizada (' + existingData.length + ' filas)');
   } catch (e) {
     Logger.log('ERROR escribiendo en la hoja: ' + e.message);

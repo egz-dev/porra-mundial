@@ -761,6 +761,27 @@ main {
   }
 }
 
+/* ── Clasificación table (5 columns: pos, name, pts, rojas, telegram) */
+.rank-row--5col {
+  grid-template-columns: 56px 1fr 90px 60px 150px;
+}
+@media (max-width: 600px) {
+  .rank-row--5col {
+    grid-template-columns: 44px 1fr 70px 50px;
+  }
+  .rank-row--5col .rank-mini {
+    display: none;
+  }
+}
+.rank-red {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--c-red, #e53e3e);
+}
+
 /* ── Equipos table ────────────────────────────────────────── */
 .equipos-table {
   width: 100%;
@@ -791,6 +812,21 @@ main {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+.pts-breakdown {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: 2px;
+}
+.pts-breakdown span {
+  font-size: 10px;
+  color: var(--c-muted);
+  background: var(--c-bg-2);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── Partidos ─────────────────────────────────────────────── */
@@ -876,9 +912,9 @@ main {
 /* ── Participant detail modal ─────────────────────────────── */
 .equipo-score-grid {
   display: grid;
-  grid-template-columns: 1fr 60px;
-  gap: 4px 12px;
-  font-size: 13px;
+  grid-template-columns: 1fr auto;
+  gap: 6px 16px;
+  font-size: 14px;
   margin-top: 12px;
 }
 .equipo-score-name {
@@ -889,4 +925,6 @@ main {
 .equipo-score-pts {
   text-align: right;
   font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
 }
