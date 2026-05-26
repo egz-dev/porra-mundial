@@ -15,7 +15,7 @@ export function parseParticipantes(rows) {
     equipos: row.slice(4, 17)
       .flatMap(cell => (cell || '').split(','))
       .map(normalizeName)
-      .filter(s => s && s.toUpperCase() !== 'FALSE'),
+      .filter(s => s && s.toUpperCase() !== 'FALSE' && s.toUpperCase() !== 'TRUE'),
   })).filter(e => e.nombre);
 
   raw.sort((a, b) => (b.timestamp > a.timestamp ? 1 : b.timestamp < a.timestamp ? -1 : 0));
