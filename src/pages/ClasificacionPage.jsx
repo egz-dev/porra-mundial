@@ -92,9 +92,9 @@ export default function ClasificacionPage() {
             <div className="rank-row rank-row--5col head" role="row" aria-rowindex={1}>
               <span>#</span>
               <span>Nombre</span>
+              <span>Provincia</span>
+              <span style={{ textAlign: 'right' }}>Rojas</span>
               <span style={{ textAlign: 'right' }}>Puntos</span>
-              <span style={{ textAlign: 'right' }}>🟥</span>
-              <span>Telegram</span>
             </div>
             {clasificacion.map((entry, idx) => {
               const pos = idx + 1;
@@ -113,11 +113,11 @@ export default function ClasificacionPage() {
                   <span className="rank-pos">{MEDAL[pos] || pos}</span>
                   <span className="rank-name">
                     {entry.nombre}
-                    <small>ver equipos →</small>
+                    <small>Ver equipos →</small>
                   </span>
-                  <span className="rank-pts">{entry.total}</span>
+                  <span className="rank-mini">{entry.provincia ? `${entry.provincia}` : '—'}</span>
                   <span className="rank-red">{entry.totalRedCards || '—'}</span>
-                  <span className="rank-mini">{entry.telegram ? `@${entry.telegram}` : '—'}</span>
+                  <span className="rank-pts">{entry.total}</span>
                 </div>
               );
             })}

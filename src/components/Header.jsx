@@ -45,10 +45,6 @@ export default function Header() {
             </div>
           </div>
 
-          <h1 className="hero-title">
-            El Mundial<br /><em>es nuestro.</em>
-          </h1>
-
           <div className="hero-meta">
             <p className="hero-sub">
               Elige tus 13 selecciones antes del 11 de junio y sigue la clasificación en directo.

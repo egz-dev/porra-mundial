@@ -11,7 +11,7 @@ export function parseParticipantes(rows) {
   const raw = rows.slice(1).map(row => ({
     timestamp: row[0] || '',
     nombre: (row[2] || '').trim(),
-    telegram: (row[3] || '').replace(/^@/, '').toLowerCase().trim(),
+    provincia: (row[3] || '').trim(),
     equipos: row.slice(4, 17)
       .flatMap(cell => (cell || '').split(','))
       .map(normalizeName)
@@ -27,10 +27,8 @@ export function parseParticipantes(rows) {
   for (const entry of raw) {
     const nombreKey = entry.nombre.toLowerCase();
     if (seenNombres.has(nombreKey)) continue;
-    if (entry.telegram && seenTelegrams.has(entry.telegram)) continue;
     seenNombres.add(nombreKey);
-    if (entry.telegram) seenTelegrams.add(entry.telegram);
-    result.push({ nombre: entry.nombre, telegram: entry.telegram, equipos: entry.equipos });
+    result.push({ nombre: entry.nombre, provincia: entry.provincia, equipos: entry.equipos });
   }
 
   return result;
