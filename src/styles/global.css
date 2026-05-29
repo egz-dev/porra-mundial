@@ -642,17 +642,15 @@ main {
 .modal-bg {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0,0,0,0.85);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 100;
   padding: 20px;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
 }
 .modal {
-  background: rgba(40,44,52,0.80);
+  background: var(--c-bg-2);
   border: 1px solid rgba(255,255,255,0.10);
   border-radius: var(--radius);
   max-width: 540px;
