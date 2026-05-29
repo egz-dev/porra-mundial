@@ -4,23 +4,23 @@ Aplicación de porra del Mundial 2026. Cada participante elige 13 selecciones al
 
 ## Stack
 
-- Vite 8 + React 19 (JSX)
-- React Router DOM v7
-- Google Sheets API v4 (lectura de datos)
-- Google Apps Script (sincronización de resultados vía football-data.org)
-- Vercel (hosting + analytics)
-- Tema Atom One Dark
+- **Vite 8 + React 19** (JSX)
+- **React Router DOM v7**
+- **Google Sheets API v4** (lectura de datos: participantes + resultados)
+- **Google Apps Script** (sincronización de resultados vía football-data.org)
+- **Vercel** (hosting + analytics)
+- **Tema Atom One Dark**
 
 ## Rutas
 
 | Ruta | Página |
 |---|---|
-| `/` | Clasificación general — ranking con filtros por nombre y provincia, columnas ordenables |
-| `/score-jpit` | Clasificación por provincia — ranking de provincias con suma de puntos de sus participantes |
-| `/grupos` | Fase de grupos del Mundial — 12 grupos (A-L) con tablas de clasificación, resultados y banderas |
-| `/eliminatorias` | Cuadro de eliminatorias — bracket de dieciseisavos a la final con resultados en vivo |
-| `/equipos` | Estadísticas por equipo — puntos, partidos jugados, goles, tarjetas rojas, fase alcanzada |
-| `/partidos` | Calendario de partidos — agrupados por fase y día, resultados y estados en vivo |
+| `/` | **Clasificación general** — ranking con filtros por nombre y provincia, columnas ordenables, modal con desglose por equipo |
+| `/score-jpit` | **Clasificación JPIT** — ranking de provincias sumando solo los 3 mejores participantes de cada una |
+| `/grupos` | **Fase de grupos** — 12 grupos (A–L) con tablas, resultados, 1.º/2.º en verde y 8 mejores terceros en dorado |
+| `/partidos` | **Partidos** — calendario agrupado por fase y día, resultados en vivo |
+| `/equipos` | **Estadísticas por equipo** — puntos, PJ, V/E/D, GF/GC, tarjetas rojas, desglose con acrónimos y leyenda interactiva |
+| `/info` | **Información** — reglas, sistema de puntuación, reparto del bote y créditos |
 
 ## Arquitectura
 
@@ -37,6 +37,79 @@ Google Sheets (Respuestas + Resultados)
    React App (Vite)
    └── scoring.js → clasificación + stats
 ```
+
+## Sistema de puntuación
+
+Cada equipo elegido por un participante suma puntos según su rendimiento real en el torneo:
+
+### Por resultados en partido
+
+| Concepto | Puntos |
+|---|---|
+| Victoria | 3 |
+| Empate | 1 |
+| Portería a cero (no recibir goles) | 1 |
+| 3+ goles en un partido | 1 (plano, no acumulable) |
+
+### Por fase alcanzada (acumulativo)
+
+| Fase | Pts fase |
+|---|---|
+| Dieciseisavos (R32) | 1 |
+| Octavos (R16) | 2 |
+| Cuartos (QF) | 3 |
+| Semifinales (SF) | 4 |
+| 3.er / 4.º puesto | 0 |
+| Final (subcampeón) | 5 |
+
+### Bonus
+
+| Concepto | Puntos |
+|---|---|
+| Campeón del mundo | +10 |
+
+### Totales por posición final
+
+| Posición | Cálculo | Total |
+|---|---|---|
+| 3.º / 4.º | 1+2+3+4+0 | **10** |
+| Subcampeón | 1+2+3+4+5 | **15** |
+| Campeón | 15 + 10 (bonus) | **25** |
+
+Las tarjetas rojas se muestran como estadística pero no restan puntos.
+
+### Desglose de puntuación (acrónimos)
+
+Cada fila de equipo muestra un desglose con los acrónimos:
+
+| Sigla | Significado |
+|---|---|
+| **V** | Puntos por victorias (3 c/u) |
+| **E** | Puntos por empates (1 c/u) |
+| **PG** | Puntos por portería a cero (1 c/u) |
+| **G** | Puntos por 3+ goles en un partido (1 c/u) |
+| **F** | Puntos acumulados por fase alcanzada |
+| **C** | Bonus de campeón (+10) |
+
+### Desempates
+
+1. Mayor número de puntos totales
+2. Mayor número de goles a favor (GF)
+3. Menor número de goles en contra (GC)
+4. Orden alfabético del nombre
+
+## Clasificación JPIT (por provincia)
+
+- Solo suman los **3 mejores participantes** de cada provincia
+- En el modal: los que suman aparecen en verde con `+`, el resto en amarillo como "No suma"
+- Se ordena por puntos, con tie-breakers de GF/GC
+
+## Fase de grupos
+
+- 12 grupos (A–L) de 4 equipos cada uno
+- Los 2 primeros de cada grupo → verdes (`gtable-row--qual`)
+- Los **8 mejores terceros** → dorados (`gtable-row--qual3rd`)
+- Cálculo automático de standings desde resultados reales
 
 ## Configuración
 
@@ -96,40 +169,15 @@ pnpm build
 
 Conecta el repo a Vercel. En Settings > Environment Variables, añade `VITE_SPREADSHEET_ID`, `VITE_SHEETS_API_KEY` y `VITE_GROUP_NAME`.
 
-## Sistema de puntuación
-
-Cada equipo elegido por un participante suma puntos según su rendimiento real en el torneo:
-
-| Concepto | Puntos |
-|---|---|
-| Victoria | 3 |
-| Empate | 1 |
-| Portería a cero | 1 |
-| Bonus de goles (cada 3 goles) | 1 |
-| Alcanzar dieciseisavos | 1 |
-| Alcanzar octavos | 2 |
-| Alcanzar cuartos | 3 |
-| Alcanzar semifinales | 4 |
-| Alcanzar final / 3er puesto | 5 |
-| Bonus campeón | 10 |
-
-Las tarjetas rojas restan visibilidad pero no puntos.
-
-### Desempates
-
-1. Mayor número de puntos totales
-2. Mayor número de goles a favor (GF)
-3. Menor número de goles en contra (GC)
-4. Orden alfabético del nombre
-
 ## Funcionalidades
 
 - ✅ Formulario de apuesta (Google Forms → Sheets)
 - ✅ Ranking en tiempo real con filtros y ordenación
-- ✅ Ranking por provincia (suma de puntos de todos los participantes de cada provincia)
-- ✅ Tablas de la fase de grupos (12 grupos A-L, standings calculados desde resultados reales)
-- ✅ Cuadro de eliminatorias (bracket R32 → R16 → QF → SF → 3.er puesto / Final)
-- ✅ Estadísticas detalladas por equipo
+- ✅ Ranking por provincia (top 3 participantes de cada provincia)
+- ✅ Tablas de la fase de grupos (12 grupos A–L, standings calculados desde resultados)
+- ✅ Mejores 8 terceros destacados en dorado
+- ✅ Estadísticas detalladas por equipo con desglose V/E/PG/G/F/C
+- ✅ Leyenda interactiva de acrónimos de puntuación
 - ✅ Calendario de partidos con estados en vivo
 - ✅ Cuenta atrás para el inicio del torneo
 - ✅ Sincronización automática de resultados vía football-data.org
@@ -137,5 +185,44 @@ Las tarjetas rojas restan visibilidad pero no puntos.
 - ✅ Tema oscuro Atom One Dark
 - ✅ Banderas de equipos desde flagcdn.com
 - ✅ Analytics con Vercel
-- ✅ Grupos del Mundial 2026 hardcodeados en `src/data/gruposMundial.js` (48 equipos)
-- ✅ Bracket de eliminatorias hardcodeado en `src/data/eliminatorias.js` (R32 con emparejamientos A-L)
+- ✅ Grupos del Mundial 2026 hardcodeados en `src/data/gruposMundial.js` (48 equipos, 12 grupos A–L)
+- ✅ Página de información con reglas, premios y créditos
+- ✅ Footer con enlaces
+
+## Estructura del proyecto
+
+```
+src/
+├── components/
+│   ├── Header.jsx        # Hero + cuenta atrás + tabs de navegación
+│   └── Footer.jsx        # Footer con créditos
+├── data/
+│   ├── paises.js         # 48 países organizados en 5 grupos para el formulario
+│   └── gruposMundial.js  # Grupos oficiales del Mundial (A–L)
+├── hooks/
+│   └── useSheetData.js   # Hook de datos vía Google Sheets API
+├── lib/
+│   ├── normalizeSheetData.js  # Parseo de respuestas y resultados
+│   ├── scoring.js              # Sistema de puntuación completo
+│   └── utils.jsx               # Utilidades (normKey, flagEl)
+├── pages/
+│   ├── ClasificacionPage.jsx  # Ranking general
+│   ├── ScoreJpitPage.jsx      # Ranking por provincia (top 3)
+│   ├── GruposPage.jsx         # Fase de grupos
+│   ├── EquiposPage.jsx        # Estadísticas por equipo
+│   ├── PartidosPage.jsx       # Calendario de partidos
+│   └── InfoPage.jsx           # Reglas e información
+├── styles/
+│   └── global.css             # Todos los estilos (Atom One Dark)
+├── App.jsx                    # Router principal
+└── main.jsx                   # Entry point
+```
+
+## Licencia
+
+Código abierto. Fork del proyecto original de [josecggarrido](https://github.com/josecggarrido).
+Editado y mantenido por [Edu García](https://github.com/egz-dev/porra-mundial).
+
+## Contribuciones
+
+¡Las contribuciones son bienvenidas! Consulta [`CONTRIBUTING.md`](./CONTRIBUTING.md) para más detalles.
