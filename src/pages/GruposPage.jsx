@@ -99,7 +99,7 @@ function calcGroupStandings(groupId, resultados) {
 
 // ── Component ────────────────────────────────────────────
 
-function GroupTable({ groupId, color, resultados }) {
+function GroupTable({ groupId, color, resultados, bestThirdSet }) {
   const standings = useMemo(() => calcGroupStandings(groupId, resultados), [groupId, resultados]);
 
   return (
@@ -120,27 +120,34 @@ function GroupTable({ groupId, color, resultados }) {
           <span>DG</span>
           <span>Pts</span>
         </div>
-        {standings.map((row, idx) => (
-          <div
-            key={row.team}
-            className={`gtable-row${idx < 2 ? ' gtable-row--qual' : ''}`}
-            role="row"
-          >
-            <span className="gtable-pos">{idx + 1}</span>
-            <span className="gtable-team">
-              {flagEl(row.team, { w: 20, h: 15 })}
-              <span>{row.team}</span>
-            </span>
-            <span>{row.pj}</span>
-            <span>{row.v}</span>
-            <span>{row.e}</span>
-            <span>{row.d}</span>
-            <span>{row.gf}</span>
-            <span>{row.gc}</span>
-            <span className="gtable-dg">{row.gf - row.gc > 0 ? '+' : ''}{row.gf - row.gc}</span>
-            <span className="gtable-pts">{row.pts}</span>
-          </div>
-        ))}
+        {standings.map((row, idx) => {
+          const isThirdBest = idx === 2 && bestThirdSet && bestThirdSet.has(row.team);
+          return (
+            <div
+              key={row.team}
+              className={[
+                'gtable-row',
+                idx < 2 ? 'gtable-row--qual' : '',
+                isThirdBest ? 'gtable-row--qual3rd' : '',
+              ].filter(Boolean).join(' ')}
+              role="row"
+            >
+              <span className="gtable-pos">{idx + 1}</span>
+              <span className="gtable-team">
+                {flagEl(row.team, { w: 20, h: 15 })}
+                <span>{row.team}</span>
+              </span>
+              <span>{row.pj}</span>
+              <span>{row.v}</span>
+              <span>{row.e}</span>
+              <span>{row.d}</span>
+              <span>{row.gf}</span>
+              <span>{row.gc}</span>
+              <span className="gtable-dg">{row.gf - row.gc > 0 ? '+' : ''}{row.gf - row.gc}</span>
+              <span className="gtable-pts">{row.pts}</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -148,8 +155,35 @@ function GroupTable({ groupId, color, resultados }) {
 
 // ── Page ─────────────────────────────────────────────────
 
+function useBestThirdSet(resultados) {
+  return useMemo(() => {
+    const thirdPlaced = [];
+
+    for (const group of GRUPOS_MUNDIAL) {
+      const standings = calcGroupStandings(group.id, resultados);
+      if (standings.length >= 3) {
+        thirdPlaced.push(standings[2]);
+      }
+    }
+
+    // Sort by pts ↓ → GD ↓ → GF ↓ → team name
+    thirdPlaced.sort((a, b) => {
+      if (b.pts !== a.pts) return b.pts - a.pts;
+      const dgA = a.gf - a.gc;
+      const dgB = b.gf - b.gc;
+      if (dgB !== dgA) return dgB - dgA;
+      if (b.gf !== a.gf) return b.gf - a.gf;
+      return a.team.localeCompare(b.team);
+    });
+
+    const bestEight = thirdPlaced.slice(0, 8);
+    return new Set(bestEight.map(t => t.team));
+  }, [resultados]);
+}
+
 export default function GruposPage() {
   const { resultados, loading, error } = useSheetData();
+  const bestThirdSet = useBestThirdSet(resultados);
 
   if (loading) return <div className="app"><main><div className="container"><p className="empty">Cargando datos…</p></div></main></div>;
   if (error) return <div className="app"><main><div className="container"><p className="empty" style={{ color: 'var(--c-red)' }}>{error}</p></div></main></div>;
@@ -169,6 +203,7 @@ export default function GruposPage() {
                 groupId={g.id}
                 color={GROUP_COLORS[idx % GROUP_COLORS.length]}
                 resultados={resultados}
+                bestThirdSet={bestThirdSet}
               />
             ))}
           </div>

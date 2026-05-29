@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useSheetData } from '../hooks/useSheetData';
 import { calcEquiposStats } from '../lib/scoring';
 import { GRUPOS, isoToFlagUrl } from '../data/paises';
@@ -11,8 +12,42 @@ function flag(team) {
     : '🏳';
 }
 
+const LEGEND_ITEMS = [
+  { key: 'V', label: 'Victorias', desc: '3 pts por victoria' },
+  { key: 'E', label: 'Empates', desc: '1 pt por empate' },
+  { key: 'PG', label: 'Portería a cero', desc: '1 pt por partido sin recibir goles' },
+  { key: 'G', label: 'Bonus goles', desc: '1 pt si marca 3+ goles en un partido' },
+  { key: 'F', label: 'Puntos de fase', desc: 'Pts por alcanzar fases eliminatorias' },
+  { key: 'C', label: 'Campeón', desc: '10 pts extra para el ganador del torneo' },
+];
+
+function LegendModal({ onClose }) {
+  return (
+    <div className="modal-bg" onClick={onClose}>
+      <div className="modal legend-modal-content" onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <h3 style={{ margin: 0 }}>Leyenda</h3>
+          <button type="button" className="modal-x" onClick={onClose} aria-label="Cerrar">&times;</button>
+        </div>
+        <table className="legend-table">
+          <tbody>
+            {LEGEND_ITEMS.map(item => (
+              <tr key={item.key}>
+                <td><span className="legend-key">{item.key}</span></td>
+                <td className="legend-label">{item.label}</td>
+                <td className="legend-desc">{item.desc}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 export default function EquiposPage() {
   const { resultados, loading, error } = useSheetData();
+  const [showLegend, setShowLegend] = useState(false);
 
   if (loading) return <div className="app"><main><div className="container"><p className="empty">Cargando equipos…</p></div></main></div>;
   if (error) return <div className="app"><main><div className="container"><p className="empty" style={{ color: 'var(--c-red, #e53e3e)' }}>{error}</p></div></main></div>;
@@ -31,10 +66,16 @@ export default function EquiposPage() {
     <div className="app">
       <main>
         <div className="container">
-          <table className="equipos-table">
+          <div className="equipos-scroll">
+            <table className="equipos-table">
             <thead>
               <tr>
-                <th>Equipo</th>
+                <th>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    Equipo
+                    <button type="button" className="btn-legend" onClick={() => setShowLegend(true)} aria-label="Leyenda de puntuación" title="Leyenda">?</button>
+                  </span>
+                </th>
                 <th>Pts</th>
                 <th>PJ</th>
                 <th>V</th>
@@ -52,20 +93,21 @@ export default function EquiposPage() {
                   <td>
                     <div className="equipo-cell">
                       <span>{flag(s.team)}</span>
-                      <span>{s.team}</span>
+                      <span className="equipo-name">{s.team}</span>
+                      {s.pts > 0 && (
+                        <span className="pts-breakdown equipo-breakdown">
+                          {s.winPts > 0 && <span title="Victorias">V:{s.winPts}</span>}
+                          {s.drawPts > 0 && <span title="Empates">E:{s.drawPts}</span>}
+                          {s.cleanSheetPts > 0 && <span title="Porterías a cero">PG:{s.cleanSheetPts}</span>}
+                          {s.goalBonusPts > 0 && <span title="3+ goles en un partido">G:{s.goalBonusPts}</span>}
+                          {s.phasePts > 0 && <span title="Puntos de fase">F:{s.phasePts}</span>}
+                          {s.championBonus > 0 && <span className="badge-champion" title="Bonus campeón">C:{s.championBonus}</span>}
+                        </span>
+                      )}
                     </div>
                   </td>
                   <td>
                     <strong>{s.pts}</strong>
-                    {s.pts > 0 && (
-                      <div className="pts-breakdown">
-                        {s.winPts > 0 && <span title="Victorias">V:{s.winPts}</span>}
-                        {s.drawPts > 0 && <span title="Empates">E:{s.drawPts}</span>}
-                        {s.cleanSheetPts > 0 && <span title="Porterías a cero">PG:{s.cleanSheetPts}</span>}
-                        {s.goalBonusPts > 0 && <span title="Bonus goles (cada 3)">G:{s.goalBonusPts}</span>}
-                        {s.phasePts > 0 && <span title="Puntos de fase">F:{s.phasePts}</span>}
-                      </div>
-                    )}
                   </td>
                   <td>{s.pj}</td>
                   <td>{s.v}</td>
@@ -78,8 +120,11 @@ export default function EquiposPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
+
+        {showLegend && <LegendModal onClose={() => setShowLegend(false)} />}
       </main>
     </div>
   );
