@@ -1,3 +1,5 @@
+import { normKey } from './utils';
+
 const PHASE_POINTS = { r32: 1, last_32: 1, r16: 2, last_16: 2, qf: 3, sf: 4, '3rd': 5, final: 5 };
 const FINISHED_STATUSES = new Set(['FT', 'AET', 'PEN']);
 const PHASE_ORDER = ['final', '3rd', 'sf', 'qf', 'r16', 'last_16', 'r32', 'last_32', 'group'];
@@ -59,10 +61,6 @@ export function detectChampion(resultados) {
   const f = resultados.find(m => m.round === 'final' && m.status === 'FT');
   if (!f || f.homeGoals === null || f.awayGoals === null || f.homeGoals === f.awayGoals) return null;
   return f.homeGoals > f.awayGoals ? f.homeTeam : f.awayTeam;
-}
-
-function normKey(s) {
-  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 }
 
 export function calcClasificacion(participantes, resultados) {
