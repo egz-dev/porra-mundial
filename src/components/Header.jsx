@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 const TOURNAMENT_START = new Date('2026-06-11T16:00:00-05:00'); // 11 jun 2026 UTC-5
@@ -23,9 +23,14 @@ function pad(n) {
 }
 
 const TABS = [
-  { to: '/',         label: 'Clasificación', icon: '🏆' },
-  { to: '/equipos',  label: 'Equipos',       icon: '🌍' },
-  { to: '/partidos', label: 'Partidos',       icon: '📅' },
+  { to: '/',              label: 'Clasificación General',     icon: '🏆' },
+  { to: '/score-jpit',    label: 'Clasificación JPIT',        icon: '📡' },
+  { to: '/grupos',        label: 'Fase de Grupos',            icon: '🏟️' },
+  { to: '/equipos',       label: 'Equipos',                   icon: '🌍' },
+  { to: '/eliminatorias', label: 'Eliminatorias',             icon: '🏟️' },
+  { to: '/partidos',      label: 'Partidos',                  icon: '📅' },
+  { to: '/info',          label: 'Info',                      icon: 'ℹ️' },
+  
 ];
 
 export default function Header() {
@@ -38,10 +43,9 @@ export default function Header() {
       <header className="hero">
         <div className="hero-inner container">
           <div className="brand">
-            <div className="brand-mark" aria-hidden="true" />
+            <div className="brand-mark" aria-hidden="true">JPIT</div>
             <div className="brand-text">
-              <span className="kicker">{import.meta.env.VITE_GROUP_NAME}</span>
-              <span className="name">Porra Mundial 2026</span>
+              <h1 className="hero-title">Porra Mundial <em>2026</em></h1>
             </div>
           </div>
 
@@ -58,11 +62,16 @@ export default function Header() {
                     { n: cd.hours, label: 'horas' },
                     { n: cd.mins, label: 'min' },
                     { n: cd.secs, label: 'seg' },
-                  ].map(({ n, label }) => (
-                    <div key={label} className="cd-unit">
-                      <div className="cd-num">{pad(n)}</div>
-                      <div className="cd-name">{label}</div>
-                    </div>
+                  ].map(({ n, label }, idx, arr) => (
+                    <Fragment key={label}>
+                      <div className="cd-unit">
+                        <div className="cd-num">{pad(n)}</div>
+                        <div className="cd-name">{label}</div>
+                      </div>
+                      {idx < arr.length - 1 && (
+                        <span className="cd-sep" aria-hidden="true">:</span>
+                      )}
+                    </Fragment>
                   ))}
                 </div>
               </div>

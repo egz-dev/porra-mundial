@@ -21,7 +21,6 @@ export function parseParticipantes(rows) {
   raw.sort((a, b) => (b.timestamp > a.timestamp ? 1 : b.timestamp < a.timestamp ? -1 : 0));
 
   const seenNombres = new Set();
-  const seenTelegrams = new Set();
   const result = [];
 
   for (const entry of raw) {
