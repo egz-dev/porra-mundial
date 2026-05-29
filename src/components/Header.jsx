@@ -25,10 +25,9 @@ function pad(n) {
 const TABS = [
   { to: '/',              label: 'Clasificación General',     icon: '🏆' },
   { to: '/score-jpit',    label: 'Clasificación JPIT',        icon: '📡' },
+  { to: '/partidos',      label: 'Partidos',                  icon: '📅' },
   { to: '/grupos',        label: 'Fase de Grupos',            icon: '🏟️' },
   { to: '/equipos',       label: 'Equipos',                   icon: '🌍' },
-  { to: '/eliminatorias', label: 'Eliminatorias',             icon: '🏟️' },
-  { to: '/partidos',      label: 'Partidos',                  icon: '📅' },
   { to: '/info',          label: 'Info',                      icon: 'ℹ️' },
   
 ];

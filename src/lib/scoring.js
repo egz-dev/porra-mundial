@@ -1,6 +1,6 @@
 import { normKey } from './utils';
 
-const PHASE_POINTS = { r32: 1, last_32: 1, r16: 2, last_16: 2, qf: 3, sf: 4, '3rd': 5, final: 5 };
+const PHASE_POINTS = { r32: 1, last_32: 1, r16: 2, last_16: 2, qf: 3, sf: 4, '3rd': 0, final: 5 };
 const FINISHED_STATUSES = new Set(['FT', 'AET', 'PEN']);
 const PHASE_ORDER = ['final', '3rd', 'sf', 'qf', 'r16', 'last_16', 'r32', 'last_32', 'group'];
 const PHASE_LABELS = {
@@ -37,7 +37,7 @@ export function calcTeamStats(team, resultados) {
     else { d++; }
 
     if (theirGoals === 0) { cleanSheetPts += 1; matchPts += 1; }
-    const gb = Math.floor(myGoals / 3);
+    const gb = myGoals >= 3 ? 1 : 0;
     goalBonusPts += gb;
     matchPts += gb;
   }
@@ -106,6 +106,8 @@ export function calcClasificacion(participantes, resultados) {
 }
 
 export function calcEquiposStats(resultados) {
+  const champion = detectChampion(resultados);
+
   const teams = new Set();
   for (const m of resultados) {
     if (m.homeTeam) teams.add(m.homeTeam);
@@ -114,11 +116,13 @@ export function calcEquiposStats(resultados) {
 
   const stats = Array.from(teams).map(team => {
     const s = calcTeamStats(team, resultados);
+    const bonus = champion && team === champion ? 10 : 0;
     return {
       team,
-      pts: s.matchPts + s.phasePts,
+      pts: s.matchPts + s.phasePts + bonus,
       matchPts: s.matchPts,
       phasePts: s.phasePts,
+      championBonus: bonus,
       winPts: s.winPts,
       drawPts: s.drawPts,
       cleanSheetPts: s.cleanSheetPts,

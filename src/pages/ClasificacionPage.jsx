@@ -26,6 +26,14 @@ function ParticipantModal({ entry, onClose }) {
       <div className="modal" onClick={e => e.stopPropagation()}>
         <h3 id="detail-title">{entry.nombre}</h3>
         {entry.telegram && <p style={{ color: 'var(--c-muted)', fontSize: 13 }}>@{entry.telegram}</p>}
+        <div className="modal-meta">
+          {entry.provincia && (
+            <span className="modal-meta-item">📍 {entry.provincia}</span>
+          )}
+          <span className={['modal-meta-item', entry.totalRedCards > 0 ? 'modal-meta-item--red' : ''].filter(Boolean).join(' ')}>
+            🟥 {entry.totalRedCards || '—'}
+          </span>
+        </div>
         <div className="equipo-score-grid">
           {entry.equipoScores.map(s => (
             <Fragment key={s.equipo}>
