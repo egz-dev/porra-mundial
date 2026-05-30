@@ -7,6 +7,7 @@ import GruposPage from './pages/GruposPage';
 import EquiposPage from './pages/EquiposPage';
 import PartidosPage from './pages/PartidosPage';
 import InfoPage from './pages/InfoPage';
+import NotFoundPage from './pages/NotFoundPage';
 import Footer from './components/Footer';
 import './styles/global.css';
 
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/partidos" element={<PartidosPage />} />
         <Route path="/grupos" element={<GruposPage />} />
         <Route path="/info" element={<InfoPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <Footer />
       <Analytics />

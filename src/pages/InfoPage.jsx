@@ -49,6 +49,44 @@ export default function InfoPage() {
               <p>En caso de empate final, se miran los goles marcados (y en su defecto los encajados). Si sigue igual, ¡se reparte!</p>
             </div>
 
+            <div className="info-card" style={{ textAlign: 'center', borderLeft: '3px solid var(--c-accent)' }}>
+              <h3>☕ INVÍTAME A UN CAFÉ</h3>
+              <p style={{ marginBottom: '20px' }}>
+                Si te gusta este proyecto y quieres apoyar su mantenimiento, ¡invítame a un café!
+                Todo suma para mantener esto en marcha ⚽🔥
+              </p>
+              <a
+                href="https://buymeacoffee.com/egzdev"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  background: '#FFDD00',
+                  color: '#000',
+                  padding: '14px 28px',
+                  borderRadius: '12px',
+                  textDecoration: 'none',
+                  fontWeight: 700,
+                  fontSize: '16px',
+                  transition: 'transform .15s, box-shadow .15s',
+                  boxShadow: '0 4px 16px rgba(255,221,0,0.25)',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 24px rgba(255,221,0,0.4)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(255,221,0,0.25)';
+                }}
+              >
+                <span style={{ fontSize: '22px' }}>☕</span>
+                Buy me a coffee
+              </a>
+            </div>
+
           </div>
         </div>
       </main>
