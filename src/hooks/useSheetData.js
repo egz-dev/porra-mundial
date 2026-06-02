@@ -9,6 +9,7 @@ const API_KEY = import.meta.env.VITE_SHEETS_API_KEY;
 export function useSheetData() {
   const [participantes, setParticipantes] = useState([]);
   const [resultados, setResultados] = useState([]);
+  const [apuestasCount, setApuestasCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const pollRef = useRef(null);
@@ -29,6 +30,7 @@ export function useSheetData() {
       );
       url.searchParams.set('ranges', "'Respuestas'!A:I");
       url.searchParams.append('ranges', 'Resultados!A:J');
+      url.searchParams.append('ranges', "'Apuestas'!A:A");
       url.searchParams.set('key', API_KEY);
 
       const res = await fetch(url.toString(), { signal: controller.signal });
@@ -36,9 +38,11 @@ export function useSheetData() {
       const data = await res.json();
       if (data.error) throw new Error(data.error.message);
 
-      const [resp, result] = data.valueRanges;
+      const [resp, result, apuestas] = data.valueRanges;
       setParticipantes(parseParticipantes(resp.values || []));
       setResultados(parseResultados(result.values || []));
+      const apuestasRows = apuestas?.values || [];
+      setApuestasCount(Math.max(0, apuestasRows.length - 1)); // -1 por la cabecera
     } catch (err) {
       if (err.name !== 'AbortError') {
         setError(err.message);
@@ -60,5 +64,5 @@ export function useSheetData() {
     return () => clearInterval(pollRef.current);
   }, [resultados, refresh]);
 
-  return { participantes, resultados, loading, error, refresh };
+  return { participantes, resultados, apuestasCount, loading, error, refresh };
 }

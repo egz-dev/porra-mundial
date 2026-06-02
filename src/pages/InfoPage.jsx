@@ -1,4 +1,8 @@
+import { useSheetData } from '../hooks/useSheetData';
+
 export default function InfoPage() {
+  const { apuestasCount, loading, error } = useSheetData();
+  const bote = apuestasCount * 5;
   return (
     <div className="app">
       <main>
@@ -35,56 +39,30 @@ export default function InfoPage() {
 
             <div className="info-card">
               <h3>💰 REPARTO DEL BOTE</h3>
-              <div className="info-prizes">
-                <div className="info-prize"><span className="info-medal">🥇</span><strong>1er clasificado</strong> → 50%</div>
-                <div className="info-prize"><span className="info-medal">🥈</span><strong>2º clasificado</strong> → 25%</div>
-                <div className="info-prize"><span className="info-medal">🥉</span><strong>3er clasificado</strong> → 15%</div>
-                <div className="info-prize"><span className="info-medal">💀</span><strong>Último</strong> (menos puntos) → 5% ¡por aguantar el tirón!</div>
-                <div className="info-prize"><span className="info-medal">🟥</span><strong>Más tarjetas rojas</strong> acumuladas → 5% ¡por jugar sucio!</div>
-              </div>
+              {error ? (
+                <p style={{ color: 'var(--c-red)' }}>No se pudo cargar el bote 😕</p>
+              ) : loading ? (
+                <p style={{ color: 'var(--c-muted)' }}>Cargando bote…</p>
+              ) : (
+                <>
+                  <div className="info-bote-total">
+                    <span className="info-bote-label">BOTE TOTAL</span>
+                    <span className="info-bote-amount">{apuestasCount} apuestas × 5 € = <strong>{bote} €</strong></span>
+                  </div>
+                  <div className="info-prizes">
+                    <div className="info-prize"><span className="info-medal">🥇</span><strong>1er clasificado</strong> → 50% <span className="info-prize-eur">({(bote * 0.5).toFixed(0)} €)</span></div>
+                    <div className="info-prize"><span className="info-medal">🥈</span><strong>2º clasificado</strong> → 25% <span className="info-prize-eur">({(bote * 0.25).toFixed(0)} €)</span></div>
+                    <div className="info-prize"><span className="info-medal">🥉</span><strong>3er clasificado</strong> → 15% <span className="info-prize-eur">({(bote * 0.15).toFixed(0)} €)</span></div>
+                    <div className="info-prize"><span className="info-medal">💀</span><strong>Último</strong> (menos puntos) → 5% <span className="info-prize-eur">({(bote * 0.05).toFixed(0)} €)</span> ¡por aguantar el tirón!</div>
+                    <div className="info-prize"><span className="info-medal">🟥</span><strong>Más tarjetas rojas</strong> acumuladas → 5% <span className="info-prize-eur">({(bote * 0.05).toFixed(0)} €)</span> ¡por jugar sucio!</div>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="info-card">
               <h3>🏅 DESEMPATES</h3>
               <p>En caso de empate final, se miran los goles marcados (y en su defecto los encajados). Si sigue igual, ¡se reparte!</p>
-            </div>
-
-            <div className="info-card" style={{ textAlign: 'center', borderLeft: '3px solid var(--c-accent)' }}>
-              <h3>☕ INVÍTAME A UN CAFÉ</h3>
-              <p style={{ marginBottom: '20px' }}>
-                Si te gusta este proyecto y quieres apoyar su mantenimiento, ¡invítame a un café!
-                Todo suma para mantener esto en marcha ⚽🔥
-              </p>
-              <a
-                href="https://buymeacoffee.com/egzdev"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  background: '#FFDD00',
-                  color: '#000',
-                  padding: '14px 28px',
-                  borderRadius: '12px',
-                  textDecoration: 'none',
-                  fontWeight: 700,
-                  fontSize: '16px',
-                  transition: 'transform .15s, box-shadow .15s',
-                  boxShadow: '0 4px 16px rgba(255,221,0,0.25)',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 24px rgba(255,221,0,0.4)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(255,221,0,0.25)';
-                }}
-              >
-                <span style={{ fontSize: '22px' }}>☕</span>
-                Buy me a coffee
-              </a>
             </div>
 
           </div>
