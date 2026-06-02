@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import Header from './components/Header';
 import ClasificacionPage from './pages/ClasificacionPage';
@@ -13,7 +13,7 @@ import './styles/global.css';
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Header />
       <Routes>
         <Route path="/" element={<ClasificacionPage />} />
@@ -26,6 +26,6 @@ export default function App() {
       </Routes>
       <Footer />
       <Analytics />
-    </BrowserRouter>
+    </HashRouter>
   );
 }

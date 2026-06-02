@@ -1,13 +1,5 @@
 import { useSheetData } from '../hooks/useSheetData';
-import { isoToFlagUrl, resolveIso } from '../data/paises';
-
-function flag(team) {
-  if (!team) return null;
-  const iso = resolveIso(team);
-  return iso
-    ? <img src={isoToFlagUrl(iso)} alt={team} width={20} height={15} style={{ verticalAlign: 'middle' }} />
-    : '🏳';
-}
+import { flagEl } from '../lib/utils';
 
 const PHASE_ORDER = ['group', 'r32', 'last_32', 'r16', 'last_16', 'qf', 'sf', '3rd', 'final'];
 const PHASE_LABELS = {
@@ -95,7 +87,7 @@ export default function PartidosPage() {
                         <div key={m.matchId} className="partido-row">
                           <div className="partido-home">
                             {homeName
-                              ? <><span>{homeName}</span><span>{flag(homeName)}</span></>
+                              ? <><span>{homeName}</span><span>{flagEl(homeName, { w: 20, h: 15, fallback: '🏳' })}</span></>
                               : <span className="partido-tbd">Por determinar</span>
                             }
                           </div>
@@ -118,7 +110,7 @@ export default function PartidosPage() {
                           </div>
                           <div className="partido-away">
                             {awayName
-                              ? <><span>{flag(awayName)}</span><span>{awayName}</span></>
+                              ? <><span>{flagEl(awayName, { w: 20, h: 15, fallback: '🏳' })}</span><span>{awayName}</span></>
                               : <span className="partido-tbd">Por determinar</span>
                             }
                           </div>

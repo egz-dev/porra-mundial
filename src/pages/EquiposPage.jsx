@@ -1,15 +1,7 @@
 import { useState } from 'react';
 import { useSheetData } from '../hooks/useSheetData';
 import { calcEquiposStats } from '../lib/scoring';
-import { isoToFlagUrl, resolveIso } from '../data/paises';
-
-function flag(team) {
-  if (!team) return null;
-  const iso = resolveIso(team);
-  return iso
-    ? <img src={isoToFlagUrl(iso)} alt={team} width={20} height={15} style={{ verticalAlign: 'middle' }} />
-    : '🏳';
-}
+import { flagEl } from '../lib/utils';
 
 const LEGEND_ITEMS = [
   { key: 'V', label: 'Victorias', desc: '3 pts por victoria' },
@@ -91,7 +83,7 @@ export default function EquiposPage() {
                 <tr key={s.team}>
                   <td>
                     <div className="equipo-cell">
-                      <span>{flag(s.team)}</span>
+                      <span>{flagEl(s.team, { w: 20, h: 15, fallback: '🏳' })}</span>
                       <span className="equipo-name">{s.team}</span>
                       {s.pts > 0 && (
                         <span className="pts-breakdown equipo-breakdown">

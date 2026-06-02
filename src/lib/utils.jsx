@@ -7,12 +7,16 @@ export function normKey(s) {
 
 // ── Flag renderer ────────────────────────────────────────
 
-/** Renderiza la bandera de un equipo como <img>. */
+/** Renderiza la bandera de un equipo como <img>.
+ *  Opciones: w, h (tamaño), fallback (si no hay ISO, e.g. '🏳'), warn (console.warn si no hay ISO). */
 export function flagEl(team, opts = {}) {
-  if (!team) return null;
-  const { w = 18, h = 13 } = opts;
+  const { w = 18, h = 13, fallback = null, warn = false } = opts;
+  if (!team) return fallback;
   const iso = resolveIso(team);
-  if (!iso) return null;
+  if (!iso) {
+    if (warn) console.warn('[porra] no flag ISO for team:', JSON.stringify(team));
+    return fallback;
+  }
   return (
     <img
       src={isoToFlagUrl(iso)}

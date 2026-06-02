@@ -1,20 +1,7 @@
 import { useState, useMemo, Fragment } from 'react';
 import { useSheetData } from '../hooks/useSheetData';
 import { calcClasificacion } from '../lib/scoring';
-import { normKey } from '../lib/utils';
-import { GRUPOS, isoToFlagUrl } from '../data/paises';
-
-const TODOS_LOS_PAISES = GRUPOS.flatMap(g => g.paises);
-const teamToIsoExact = new Map(TODOS_LOS_PAISES.map(p => [p.nombre, p.iso]));
-const teamToIsoNorm  = new Map(TODOS_LOS_PAISES.map(p => [normKey(p.nombre), p.iso]));
-function flag(team) {
-  if (!team) return null;
-  const iso = teamToIsoExact.get(team) ?? teamToIsoNorm.get(normKey(team));
-  if (!iso) console.warn('[porra] no flag ISO for team:', JSON.stringify(team));
-  return iso
-    ? <img src={isoToFlagUrl(iso)} alt={team} width={20} height={15} style={{ verticalAlign: 'middle' }} />
-    : '🏳';
-}
+import { normKey, flagEl } from '../lib/utils';
 
 
 const TOP_CLASS = { 1: 'top1', 2: 'top2', 3: 'top3' };
@@ -38,7 +25,7 @@ function ParticipantModal({ entry, onClose }) {
           {entry.equipoScores.map(s => (
             <Fragment key={s.equipo}>
               <div className="equipo-score-name">
-                <span>{flag(s.equipo)}</span>
+                <span>{flagEl(s.equipo, { w: 20, h: 15, fallback: '🏳', warn: true })}</span>
                 <span>{s.equipo}</span>
               </div>
               <div className="equipo-score-pts">
