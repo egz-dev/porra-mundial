@@ -37,6 +37,7 @@ function ParticipantModal({ entry, onClose }) {
         <div className="equipo-score-grid">
           {entry.equipoScores.map(s => (
             <Fragment key={s.equipo}>
+              {/* FIX TODO: revisar renderizado de banderas ENG y BA */}
               <div className="equipo-score-name">
                 <span>{flag(s.equipo)}</span>
                 <span>{s.equipo}</span>
