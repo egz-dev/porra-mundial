@@ -1,8 +1,11 @@
+import { stripFlagEmojis } from '../data/paises';
+
 const NUM_PREFIX_RE = /^\d+\s*-\s*/;
-const FLAG_RE = /[\u{1F1E0}-\u{1F1FF}]/gu;
 
 function normalizeName(raw) {
-  return (raw || '').replace(FLAG_RE, '').trim().replace(NUM_PREFIX_RE, '').trim();
+  return stripFlagEmojis((raw || ''))
+    .replace(NUM_PREFIX_RE, '')
+    .trim();
 }
 
 export function parseParticipantes(rows) {

@@ -115,7 +115,16 @@ export function isoToFlagUrl(iso) {
 export const PAIS_ALIASES = {
   'ENG': 'GB-ENG',
   'SCO': 'GB-SCT',
+  'BOSNIA Y HERZEGOVINA': 'BA',
 };
+
+/** Regex que cubre banderas emoji de indicador regional (U+1F1E0..U+1F1FF)
+ *  y banderas de subdivisión (U+1F3F4 + tags U+E0000..U+E007F). */
+const FLAG_EMOJI_RE = /[\u{1F1E0}-\u{1F1FF}\u{1F3F4}\u{E0000}-\u{E007F}]/gu;
+
+export function stripFlagEmojis(s) {
+  return (s || '').replace(FLAG_EMOJI_RE, '').trim();
+}
 
 // ── ISO resolution ──────────────────────────────────────
 
@@ -125,19 +134,21 @@ const teamToIsoNorm  = new Map(TODOS_LOS_PAISES.map(p => [p.nombre.normalize('NF
 /** Resuelve el código ISO a partir del nombre de un equipo, con soporte para abreviaturas. */
 export function resolveIso(team) {
   if (!team) return null;
+  // 0. Strip flag emojis that may be embedded in the name
+  const cleaned = stripFlagEmojis(team);
   // 1. Exact match by team name
-  const iso = teamToIsoExact.get(team);
+  const iso = teamToIsoExact.get(cleaned);
   if (iso) return iso;
   // 2. Normalized match
-  const key = team.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  const key = cleaned.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
   const isoNorm = teamToIsoNorm.get(key);
   if (isoNorm) return isoNorm;
   // 3. Alias map (e.g. ENG → GB-ENG)
-  const alias = PAIS_ALIASES[team.toUpperCase()];
+  const alias = PAIS_ALIASES[cleaned.toUpperCase()];
   if (alias) return alias;
   // 4. Try team name as ISO directly (e.g. BA → ba.png)
-  if (/^[A-Z]{2,3}(-[A-Z]{3})?$/.test(team.toUpperCase().trim())) {
-    return team.toUpperCase().trim();
+  if (/^[A-Z]{2,3}(-[A-Z]{3})?$/.test(cleaned.toUpperCase().trim())) {
+    return cleaned.toUpperCase().trim();
   }
   return null;
 }

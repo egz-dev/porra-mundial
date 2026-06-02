@@ -2,11 +2,14 @@ import { useState, useMemo, Fragment } from 'react';
 import { useSheetData } from '../hooks/useSheetData';
 import { calcClasificacion } from '../lib/scoring';
 import { normKey } from '../lib/utils';
-import { isoToFlagUrl, resolveIso } from '../data/paises';
+import { GRUPOS, isoToFlagUrl } from '../data/paises';
 
+const TODOS_LOS_PAISES = GRUPOS.flatMap(g => g.paises);
+const teamToIsoExact = new Map(TODOS_LOS_PAISES.map(p => [p.nombre, p.iso]));
+const teamToIsoNorm  = new Map(TODOS_LOS_PAISES.map(p => [normKey(p.nombre), p.iso]));
 function flag(team) {
   if (!team) return null;
-  const iso = resolveIso(team);
+  const iso = teamToIsoExact.get(team) ?? teamToIsoNorm.get(normKey(team));
   if (!iso) console.warn('[porra] no flag ISO for team:', JSON.stringify(team));
   return iso
     ? <img src={isoToFlagUrl(iso)} alt={team} width={20} height={15} style={{ verticalAlign: 'middle' }} />
@@ -34,7 +37,7 @@ function ParticipantModal({ entry, onClose }) {
         <div className="equipo-score-grid">
           {entry.equipoScores.map(s => (
             <Fragment key={s.equipo}>
-
+              {/* TODO: revisar renderizado de banderas ENG y BA */}
               <div className="equipo-score-name">
                 <span>{flag(s.equipo)}</span>
                 <span>{s.equipo}</span>
