@@ -110,3 +110,34 @@ export function isoToFlagUrl(iso) {
   if (!iso) return null;
   return `https://flagcdn.com/20x15/${iso.toLowerCase()}.png`;
 }
+
+/** Abreviaturas comunes → ISO real. Ej: ENG → GB-ENG */
+export const PAIS_ALIASES = {
+  'ENG': 'GB-ENG',
+  'SCO': 'GB-SCT',
+};
+
+// ── ISO resolution ──────────────────────────────────────
+
+const teamToIsoExact = new Map(TODOS_LOS_PAISES.map(p => [p.nombre, p.iso]));
+const teamToIsoNorm  = new Map(TODOS_LOS_PAISES.map(p => [p.nombre.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(), p.iso]));
+
+/** Resuelve el código ISO a partir del nombre de un equipo, con soporte para abreviaturas. */
+export function resolveIso(team) {
+  if (!team) return null;
+  // 1. Exact match by team name
+  const iso = teamToIsoExact.get(team);
+  if (iso) return iso;
+  // 2. Normalized match
+  const key = team.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  const isoNorm = teamToIsoNorm.get(key);
+  if (isoNorm) return isoNorm;
+  // 3. Alias map (e.g. ENG → GB-ENG)
+  const alias = PAIS_ALIASES[team.toUpperCase()];
+  if (alias) return alias;
+  // 4. Try team name as ISO directly (e.g. BA → ba.png)
+  if (/^[A-Z]{2,3}(-[A-Z]{3})?$/.test(team.toUpperCase().trim())) {
+    return team.toUpperCase().trim();
+  }
+  return null;
+}

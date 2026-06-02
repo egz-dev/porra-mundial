@@ -1,11 +1,9 @@
 import { useSheetData } from '../hooks/useSheetData';
-import { GRUPOS, isoToFlagUrl } from '../data/paises';
+import { isoToFlagUrl, resolveIso } from '../data/paises';
 
-const TODOS_LOS_PAISES = GRUPOS.flatMap(g => g.paises);
-const teamToIso = new Map(TODOS_LOS_PAISES.map(p => [p.nombre, p.iso]));
 function flag(team) {
   if (!team) return null;
-  const iso = teamToIso.get(team);
+  const iso = resolveIso(team);
   return iso
     ? <img src={isoToFlagUrl(iso)} alt={team} width={20} height={15} style={{ verticalAlign: 'middle' }} />
     : '🏳';
