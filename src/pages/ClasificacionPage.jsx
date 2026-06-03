@@ -12,7 +12,6 @@ function ParticipantModal({ entry, onClose }) {
     <div className="modal-bg" role="dialog" aria-modal="true" aria-labelledby="detail-title" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <h3 id="detail-title">{entry.nombre}</h3>
-        {entry.telegram && <p style={{ color: 'var(--c-muted)', fontSize: 13 }}>@{entry.telegram}</p>}
         <div className="modal-meta">
           {entry.provincia && (
             <span className="modal-meta-item">📍 {entry.provincia}</span>
@@ -59,7 +58,7 @@ function ParticipantModal({ entry, onClose }) {
 function useFilterSort(data) {
   const [province, setProvince] = useState('');
   const [query, setQuery] = useState('');
-  const [sort, setSort] = useState({ col: 'puntos', dir: 'desc' });
+  const [sort, setSort] = useState({ col: 'pos', dir: 'asc' });
 
   const dataWithPos = useMemo(() => data.map((d, i) => ({ ...d, _originalPos: i + 1 })), [data]);
 
