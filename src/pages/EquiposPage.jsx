@@ -7,7 +7,7 @@ const LEGEND_ITEMS = [
   { key: 'V', label: 'Victorias', desc: '3 pts por victoria' },
   { key: 'E', label: 'Empates', desc: '1 pt por empate' },
   { key: 'PG', label: 'Portería a cero', desc: '1 pt por partido sin recibir goles' },
-  { key: 'G', label: 'Bonus goles', desc: '1 pt si marca 3+ goles en un partido' },
+  { key: 'G', label: 'Bonus goles', desc: '2 pts si marca 3+ goles en un partido' },
   { key: 'F', label: 'Puntos de fase', desc: 'Pts por alcanzar fases eliminatorias' },
   { key: 'C', label: 'Campeón', desc: '10 pts extra para el ganador del torneo' },
 ];

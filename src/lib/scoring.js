@@ -37,7 +37,7 @@ export function calcTeamStats(team, resultados) {
     else { d++; }
 
     if (theirGoals === 0) { cleanSheetPts += 1; matchPts += 1; }
-    const gb = myGoals >= 3 ? 1 : 0;
+    const gb = myGoals >= 3 ? 2 : 0;
     goalBonusPts += gb;
     matchPts += gb;
   }

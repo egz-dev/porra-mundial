@@ -58,12 +58,17 @@ function normalizeMatchStatus(apiStatus, duration) {
 
 // Returns [homeRedCards, awayRedCards] from the bookings array
 function extractRedCards(match) {
-  if (!match.bookings || !Array.isArray(match.bookings)) return [0, 0];
+  if (!match || !match.bookings || !Array.isArray(match.bookings)) return [0, 0];
   var homeId = match.homeTeam && match.homeTeam.id;
   var homeRed = 0, awayRed = 0;
   for (var i = 0; i < match.bookings.length; i++) {
     var b = match.bookings[i];
-    if (b.type !== 'RED_CARD' && b.type !== 'YELLOW_RED_CARD') continue;
+    if (!b || !b.card) continue;
+    // Aceptar tanto 'RED' / 'RED_CARD' y 'YELLOW_RED' / 'YELLOW_RED_CARD' por si la API cambia el sufijo
+    var c = String(b.card).toUpperCase();
+    var isRed = c === 'RED' || c === 'RED_CARD';
+    var isYellowRed = c === 'YELLOW_RED' || c === 'YELLOW_RED_CARD' || c === 'SECOND_YELLOW';
+    if (!isRed && !isYellowRed) continue;
     if (b.team && b.team.id === homeId) homeRed++;
     else awayRed++;
   }
@@ -262,6 +267,20 @@ function fetchResults() {
     if (idToRow.hasOwnProperty(key)) {
       var rowIdx = idToRow[key];
       var existing = existingData[rowIdx];
+      // Preserve manual red card entries when the API doesn't return bookings data.
+      // extractRedCards() returns [0, 0] both when a match had no reds AND when the
+      // bookings field is missing entirely from the response, so we can't tell them
+      // apart. We choose to never overwrite a non-zero I/J with [0, 0]: user-entered
+      // values stick, and a real API value (e.g. after upgrading to a tier that exposes
+      // bookings) will still flow through and replace them.
+      if (reds[0] === 0 && reds[1] === 0) {
+        var existingHomeReds = Number(existing[8]) || 0;
+        var existingAwayReds = Number(existing[9]) || 0;
+        if (existingHomeReds !== 0 || existingAwayReds !== 0) {
+          row[8] = existingHomeReds;
+          row[9] = existingAwayReds;
+        }
+      }
       var rowChanged = false;
       for (var c = 0; c < row.length; c++) {
         if (String(existing[c]) !== String(row[c])) { rowChanged = true; break; }
@@ -296,7 +315,7 @@ function fetchMatchesFromAPI_(apiKey) {
   var url = 'https://api.football-data.org/v4/competitions/WC/matches?season=2026';
   try {
     var response = UrlFetchApp.fetch(url, {
-      headers: { 'X-Auth-Token': apiKey },
+      headers: { 'X-Auth-Token': apiKey, 'X-Unfold-Bookings': 'true' },
       muteHttpExceptions: true,
     });
     if (response.getResponseCode() !== 200) {
