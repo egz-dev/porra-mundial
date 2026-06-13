@@ -50,11 +50,11 @@ export default function InfoPage() {
                     <span className="info-bote-amount">{apuestasCount} apuestas × 5 € = <strong>{bote} €</strong></span>
                   </div>
                   <div className="info-prizes">
-                    <div className="info-prize"><span className="info-medal">🥇</span><strong>1er clasificado</strong> → 50% <span className="info-prize-eur">({(bote * 0.5).toFixed(0)} €)</span></div>
-                    <div className="info-prize"><span className="info-medal">🥈</span><strong>2º clasificado</strong> → 25% <span className="info-prize-eur">({(bote * 0.25).toFixed(0)} €)</span></div>
-                    <div className="info-prize"><span className="info-medal">🥉</span><strong>3er clasificado</strong> → 15% <span className="info-prize-eur">({(bote * 0.15).toFixed(0)} €)</span></div>
-                    <div className="info-prize"><span className="info-medal">💀</span><strong>Último</strong> (menos puntos) → 5% <span className="info-prize-eur">({(bote * 0.05).toFixed(0)} €)</span> ¡por aguantar el tirón!</div>
-                    <div className="info-prize"><span className="info-medal">🟥</span><strong>Más tarjetas rojas</strong> acumuladas → 5% <span className="info-prize-eur">({(bote * 0.05).toFixed(0)} €)</span> ¡por jugar sucio!</div>
+                    <div className="info-prize"><span className="info-medal">🥇</span><strong>1er clasificado</strong> → 50% <span className="info-prize-eur">42 €</span></div>
+                    <div className="info-prize"><span className="info-medal">🥈</span><strong>2º clasificado</strong> → 25% <span className="info-prize-eur">21 €</span></div>
+                    <div className="info-prize"><span className="info-medal">🥉</span><strong>3er clasificado</strong> → 15% <span className="info-prize-eur">12 €</span></div>
+                    <div className="info-prize"><span className="info-medal">💀</span><strong>Último</strong> (menos puntos) → 5% <span className="info-prize-eur">5 €</span> ¡por aguantar el tirón!</div>
+                    <div className="info-prize"><span className="info-medal">🟥</span><strong>Más tarjetas rojas</strong> acumuladas → 5% <span className="info-prize-eur">5 €</span> ¡por jugar sucio!</div>
                   </div>
                 </>
               )}
