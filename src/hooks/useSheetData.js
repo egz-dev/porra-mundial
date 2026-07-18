@@ -52,6 +52,13 @@ export function useSheetData() {
     }
   }, []);
 
+  // Carga inicial al montar. La regla `react-hooks/set-state-in-effect` marca
+  // esta línea porque refresh() llama a setLoading(true) sincrónicamente antes
+  // del primer await, pero es el patrón canónico de "fetch on mount": sólo se
+  // ejecuta una vez (refresh es estable vía useCallback) y nunca produce renders
+  // en cascada — la actualización final de los datos ocurre una sola vez tras
+  // resolverse la promesa de Sheets API.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { refresh(); }, [refresh]);
 
   // Polling automático cuando hay partidos en vivo

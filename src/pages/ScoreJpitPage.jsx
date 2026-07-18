@@ -146,8 +146,6 @@ export default function ScoreJpitPage() {
         case 'puntos':
           cmp = a.puntos - b.puntos;
           break;
-        default:
-          cmp = 0;
       }
       if (cmp !== 0) return cmp * m;
       // tie-breakers: puntos desc → GF desc → nombre asc

@@ -102,8 +102,6 @@ function useFilterSort(data) {
         case 'puntos':
           cmp = a.total - b.total;
           break;
-        default:
-          cmp = 0;
       }
       if (cmp !== 0) return cmp * m;
       // tie-breakers: puntos desc → GF desc → GC asc → nombre asc
