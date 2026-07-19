@@ -1,7 +1,5 @@
-import { useState, useEffect, useMemo, Fragment } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useSheetData } from '../hooks/useSheetData';
-import { calcClasificacion } from '../lib/scoring';
 
 const TOURNAMENT_START = new Date('2026-06-11T16:00:00-05:00'); // 11 jun 2026 UTC-5
 
@@ -34,9 +32,6 @@ const TABS = [
 
 ];
 
-// Estructura de premios (mantener sincronizada con InfoPage)
-const PRIZE_AMOUNTS = { 1: 42, 2: 21, 3: 12, last: 5, reds: 5 };
-
 // Mensaje motivacional: banderita celebrando a España camino del mundial
 function MensajeRoja() {
   return (
@@ -45,72 +40,6 @@ function MensajeRoja() {
       <div className="mensaje-roja-text">
         <span className="mensaje-roja-headline">¡Por hacer historia!</span>
         <span className="mensaje-roja-sub">Todos somos España · A por la Roja</span>
-      </div>
-    </div>
-  );
-}
-
-// Reparto momentáneo: muestra los 5 ganadores virtuales según la clasificación
-// actual. Solo un premio por participante, así no se solapan en escenarios con
-// pocos participantes.
-function BoteMomentaneoRow() {
-  const { participantes, resultados, apuestasCount } = useSheetData();
-  const clasificacion = useMemo(
-    () => participantes.length > 0 ? calcClasificacion(participantes, resultados) : [],
-    [participantes, resultados],
-  );
-
-  if (clasificacion.length === 0) return null;
-
-  const won = new Set();
-  const chips = [];
-  const addChip = (player, pos, medal, eur, variant) => {
-    if (!player || won.has(player.nombre)) return;
-    won.add(player.nombre);
-    chips.push({
-      key: `${pos}-${player.nombre}`,
-      pos, medal, eur, name: player.nombre, variant,
-    });
-  };
-
-  addChip(clasificacion[0],                              '1º',    '🥇', PRIZE_AMOUNTS[1],    'gold');
-  addChip(clasificacion[1],                              '2º',    '🥈', PRIZE_AMOUNTS[2],    'silver');
-  addChip(clasificacion[2],                              '3º',    '🥉', PRIZE_AMOUNTS[3],    'bronze');
-  addChip(clasificacion[clasificacion.length - 1],       'Últ.',  '💀', PRIZE_AMOUNTS.last,  'last');
-
-  // Más rojas: solo si alguien tiene > 0 rojas
-  const maxReds = clasificacion.reduce((m, c) => Math.max(m, c.totalRedCards || 0), 0);
-  if (maxReds > 0) {
-    const rojasWinner = clasificacion.find(c => (c.totalRedCards || 0) === maxReds);
-    addChip(rojasWinner, `🟥 ${maxReds}`, '🟥', PRIZE_AMOUNTS.reds, 'reds');
-  }
-
-  if (chips.length === 0) return null;
-
-  const boteTotal = apuestasCount * 5;
-
-  return (
-    <div className="bote-momentaneo" role="region" aria-label="Reparto momentáneo del bote">
-      <div className="bote-bar-head">
-        <span className="bote-pulse" aria-hidden="true" />
-        <span className="bote-bar-label">Reparto momentáneo del bote</span>
-        {boteTotal > 0 && (
-          <span className="bote-bar-total" aria-label={`Bote total: ${boteTotal} euros`}>
-            🏆 Bote <strong>{boteTotal} €</strong>
-          </span>
-        )}
-      </div>
-      <div className="bote-grid">
-        {chips.map(c => (
-          <div key={c.key} className={`bote-chip bote-chip--${c.variant}`}>
-            <span className="bote-chip-medal" aria-hidden="true">{c.medal}</span>
-            <div className="bote-chip-info">
-              <span className="bote-chip-pos">{c.pos}</span>
-              <span className="bote-chip-name" title={c.name}>{c.name}</span>
-            </div>
-            <span className="bote-chip-eur">{c.eur} €</span>
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -137,8 +66,6 @@ export default function Header() {
           </div>
 
           <MensajeRoja />
-
-          <BoteMomentaneoRow />
 
           <div className="hero-meta">
             {!started && (

@@ -13,17 +13,31 @@ const FINAL_PRIZES = [
   { pos: 2, label: '2º clasificado', amount: 21 },
   { pos: 3, label: '3er clasificado', amount: 12 },
 ];
-const BONUS_PRIZES = [
-  { medal: '💀', label: 'Último', detail: '(menos puntos)', tail: '¡por aguantar el tirón!', amount: 5 },
-  { medal: '🟥', label: 'Más tarjetas rojas', detail: 'acumuladas', tail: '¡por jugar sucio!', amount: 5 },
-];
 
-function WrapUpBanner() {
+function SpainChampionBanner() {
+  const flags = '🇪🇸'.repeat(14);
+  return (
+    <div className="spain-campeones-banner" role="banner" aria-label="España campeona del mundo 2026">
+      <div className="spain-campeones-flags" aria-hidden="true">{flags}</div>
+      <div className="spain-campeones-content">
+        <span className="spain-campeones-flag-big" aria-hidden="true">🇪🇸</span>
+        <div className="spain-campeones-text">
+          <h3 className="spain-campeones-headline">¡ESPAÑA CAMPEONA DEL MUNDO 2026!</h3>
+          <span className="spain-campeones-sub">Porra Mundial JPITs · ¡Enhorabuena, somos campeones!</span>
+        </div>
+        <span className="spain-campeones-flag-big" aria-hidden="true">🇪🇸</span>
+      </div>
+      <div className="spain-campeones-flags" aria-hidden="true">{flags}</div>
+    </div>
+  );
+}
+
+function WrapUpMessage() {
   return (
     <div className="wrap-up-banner" role="status">
       <span className="wrap-up-icon" aria-hidden="true">📋</span>
       <span className="wrap-up-text">
-        En los próximos días, se revisarán las puntuaciones y agradecimientos a los participantes.
+        En los próximos días se llevará a cabo la revisión de las puntuaciones. Gracias a todos por participar.
       </span>
     </div>
   );
@@ -59,26 +73,52 @@ function ChampionPodium({ top3 }) {
   );
 }
 
-function RepartoBote() {
+function RepartoBote({ clasificacion }) {
+  if (!clasificacion || clasificacion.length === 0) return null;
+
+  const top1 = clasificacion[0];
+  const top2 = clasificacion[1];
+  const top3 = clasificacion[2];
+  const last = clasificacion[clasificacion.length - 1];
+  const maxReds = clasificacion.reduce((m, c) => Math.max(m, c.totalRedCards || 0), 0);
+  const redsWinner = maxReds > 0
+    ? clasificacion.find(c => (c.totalRedCards || 0) === maxReds)
+    : null;
+  const showBonus = clasificacion.length >= 2;
+
   return (
     <div className="info-card reparto-card">
       <h3>💰 REPARTO DEL BOTE</h3>
       <div className="info-prizes">
-        {FINAL_PRIZES.map(({ pos, label, amount }) => (
-          <div key={label} className="info-prize">
-            <span className="info-medal">{MEDAL[pos]}</span>
-            <strong>{label}</strong> → <span className="info-prize-eur">{amount} €</span>
+        <div className="info-prize">
+          <span className="info-medal">🥇</span>
+          <strong>1er clasificado</strong> — <span className="prize-winner">{top1?.nombre}</span> → <span className="info-prize-eur">{FINAL_PRIZES[0].amount} €</span>
+        </div>
+        {top2 && (
+          <div className="info-prize">
+            <span className="info-medal">🥈</span>
+            <strong>2º clasificado</strong> — <span className="prize-winner">{top2.nombre}</span> → <span className="info-prize-eur">{FINAL_PRIZES[1].amount} €</span>
           </div>
-        ))}
-        {BONUS_PRIZES.map(({ medal, label, detail, tail, amount }) => (
-          <div key={label} className="info-prize">
-            <span className="info-medal">{medal}</span>
-            <strong>{label}</strong>
-            {detail && <> <span style={{ color: 'var(--c-ink-soft)' }}>{detail}</span></>}
-            → <span className="info-prize-eur">{amount} €</span>
-            {tail && <span style={{ marginLeft: 6, color: 'var(--c-ink-soft)', fontSize: 13 }}>{tail}</span>}
+        )}
+        {top3 && (
+          <div className="info-prize">
+            <span className="info-medal">🥉</span>
+            <strong>3er clasificado</strong> — <span className="prize-winner">{top3.nombre}</span> → <span className="info-prize-eur">{FINAL_PRIZES[2].amount} €</span>
           </div>
-        ))}
+        )}
+        {showBonus && (
+          <div className="info-prize">
+            <span className="info-medal">💀</span>
+            <strong>Último (menos puntos)</strong> — <span className="prize-winner">{last.nombre}</span> → <span className="info-prize-eur">5 €</span>
+            {last === top1 && <span style={{ marginLeft: 6, color: 'var(--c-ink-soft)', fontSize: 13 }}>(único participante)</span>}
+          </div>
+        )}
+        {redsWinner && (
+          <div className="info-prize">
+            <span className="info-medal">🟥</span>
+            <strong>Más tarjetas rojas</strong> — <span className="prize-winner">{redsWinner.nombre}</span> ({maxReds}) → <span className="info-prize-eur">5 €</span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -265,9 +305,10 @@ export default function ClasificacionPage() {
         <div className="container">
           {clasificacion.length > 0 && (
             <>
-              <WrapUpBanner />
+              <WrapUpMessage />
+              <SpainChampionBanner />
               <ChampionPodium top3={clasificacion.slice(0, 3)} />
-              <RepartoBote />
+              <RepartoBote clasificacion={clasificacion} />
             </>
           )}
 
