@@ -7,6 +7,83 @@ import { normKey, flagEl } from '../lib/utils';
 const TOP_CLASS = { 1: 'top1', 2: 'top2', 3: 'top3' };
 const MEDAL = { 1: '🥇', 2: '🥈', 3: '🥉' };
 
+// Premios del cierre (campeones y reparto del bote)
+const FINAL_PRIZES = [
+  { pos: 1, label: '1er clasificado', amount: 42 },
+  { pos: 2, label: '2º clasificado', amount: 21 },
+  { pos: 3, label: '3er clasificado', amount: 12 },
+];
+const BONUS_PRIZES = [
+  { medal: '💀', label: 'Último', detail: '(menos puntos)', tail: '¡por aguantar el tirón!', amount: 5 },
+  { medal: '🟥', label: 'Más tarjetas rojas', detail: 'acumuladas', tail: '¡por jugar sucio!', amount: 5 },
+];
+
+function WrapUpBanner() {
+  return (
+    <div className="wrap-up-banner" role="status">
+      <span className="wrap-up-icon" aria-hidden="true">📋</span>
+      <span className="wrap-up-text">
+        En los próximos días, se revisarán las puntuaciones y agradecimientos a los participantes.
+      </span>
+    </div>
+  );
+}
+
+function ChampionPodium({ top3 }) {
+  if (!top3 || top3.length === 0) return null;
+  return (
+    <div className="champions-card">
+      <h3 className="champions-heading" id="champions-title">
+        <span aria-hidden="true">🏆</span>
+        ¡ENHORABUENA A LOS CAMPEONES!
+        <span aria-hidden="true">🏆</span>
+      </h3>
+      <div className="podium-row" role="list" aria-labelledby="champions-title">
+        {FINAL_PRIZES.map(({ pos, amount }) => {
+          const entry = top3[pos - 1];
+          if (!entry) return null;
+          const medal = MEDAL[pos];
+          return (
+            <div key={pos} className={`podium-card podium-pos-${pos}`} role="listitem">
+              {pos === 1 && <span className="podium-crown" aria-hidden="true">👑</span>}
+              <span className="podium-medal" aria-hidden="true">{medal}</span>
+              <span className="podium-name">{entry.nombre}</span>
+              {entry.provincia && <span className="podium-provincia">📍 {entry.provincia}</span>}
+              <span className="podium-pts">{entry.total} pts</span>
+              <span className="podium-prize">{amount} € 🏆</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function RepartoBote() {
+  return (
+    <div className="info-card reparto-card">
+      <h3>💰 REPARTO DEL BOTE</h3>
+      <div className="info-prizes">
+        {FINAL_PRIZES.map(({ pos, label, amount }) => (
+          <div key={label} className="info-prize">
+            <span className="info-medal">{MEDAL[pos]}</span>
+            <strong>{label}</strong> → <span className="info-prize-eur">{amount} €</span>
+          </div>
+        ))}
+        {BONUS_PRIZES.map(({ medal, label, detail, tail, amount }) => (
+          <div key={label} className="info-prize">
+            <span className="info-medal">{medal}</span>
+            <strong>{label}</strong>
+            {detail && <> <span style={{ color: 'var(--c-ink-soft)' }}>{detail}</span></>}
+            → <span className="info-prize-eur">{amount} €</span>
+            {tail && <span style={{ marginLeft: 6, color: 'var(--c-ink-soft)', fontSize: 13 }}>{tail}</span>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function ParticipantModal({ entry, onClose }) {
   return (
     <div className="modal-bg" role="dialog" aria-modal="true" aria-labelledby="detail-title" onClick={onClose}>
@@ -186,6 +263,14 @@ export default function ClasificacionPage() {
     <div className="app">
       <main>
         <div className="container">
+          {clasificacion.length > 0 && (
+            <>
+              <WrapUpBanner />
+              <ChampionPodium top3={clasificacion.slice(0, 3)} />
+              <RepartoBote />
+            </>
+          )}
+
           <div className="filter-bar">
             <input
               type="text"

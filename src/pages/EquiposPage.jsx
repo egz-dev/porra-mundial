@@ -80,11 +80,12 @@ export default function EquiposPage() {
             </thead>
             <tbody>
               {stats.map(s => (
-                <tr key={s.team}>
+                <tr key={s.team} className={s.championBonus > 0 ? 'champion-row' : ''}>
                   <td>
                     <div className="equipo-cell">
                       <span>{flagEl(s.team, { w: 20, h: 15, fallback: '🏳' })}</span>
                       <span className="equipo-name">{s.team}</span>
+                      {s.championBonus > 0 && <span className="champion-trophy" title="Campeón del mundo">🏆</span>}
                       {s.pts > 0 && (
                         <span className="pts-breakdown equipo-breakdown">
                           {s.winPts > 0 && <span title="Victorias">V:{s.winPts}</span>}
