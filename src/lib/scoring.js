@@ -58,7 +58,7 @@ function getFaseLabel(phasesReached) {
 }
 
 export function detectChampion(resultados) {
-  const f = resultados.find(m => m.round === 'final' && m.status === 'FT');
+  const f = resultados.find(m => m.round === 'final' && FINISHED_STATUSES.has(m.status));
   if (!f || f.homeGoals === null || f.awayGoals === null || f.homeGoals === f.awayGoals) return null;
   return f.homeGoals > f.awayGoals ? f.homeTeam : f.awayTeam;
 }
